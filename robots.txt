@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /telechargement/
+
+Sitemap: https://dockfall.netlify.app/sitemap.xml

@@ -5,9 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>html { -webkit-text-size-adjust: 100%; } body { margin: 0; } img { max-width: 100%; } [hidden] { display: none !important; }
 :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }</style>
-<title>Dockfall</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Dockfall: run a refueling station deep in debt to the Company. A pixel-art roguelite management game for Windows.">
+<title>Dockfall • Free roguelite space station management game (Windows)</title>
+<meta name="description" content="Dockfall is a free pixel-art roguelite management game for Windows: run a refueling space station deep in debt, refuel and repair ships, hire your crew, fight off pirates and buy the station. World leaderboard, wiki, in English and French.">
+<meta name="keywords" content="dockfall, management game, free management game, space station, space station management, space station builder, roguelite, roguelike, pixel art game, indie game, free PC game, Windows game, space sim, tycoon, colony sim, Godot">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#07090f">
+<link rel="canonical" href="https://dockfall.netlify.app/en/">
+<link rel="alternate" hreflang="fr" href="https://dockfall.netlify.app/">
+<link rel="alternate" hreflang="en" href="https://dockfall.netlify.app/en/">
+<link rel="alternate" hreflang="x-default" href="https://dockfall.netlify.app/en/">
+<link rel="apple-touch-icon" href="https://dockfall.netlify.app/images/icone.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Dockfall">
+<meta property="og:title" content="Dockfall • Free roguelite space station management game (Windows)">
+<meta property="og:description" content="Dockfall is a free pixel-art roguelite management game for Windows: run a refueling space station deep in debt, refuel and repair ships, hire your crew, fight off pirates and buy the station. World leaderboard, wiki, in English and French.">
+<meta property="og:url" content="https://dockfall.netlify.app/en/">
+<meta property="og:image" content="https://dockfall.netlify.app/images/en/station.png">
+<meta property="og:image:width" content="1440">
+<meta property="og:image:height" content="810">
+<meta property="og:image:alt" content="A run of Dockfall: the space station in cross-section, ships docked.">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Dockfall • Free roguelite space station management game (Windows)">
+<meta name="twitter:description" content="Dockfall is a free pixel-art roguelite management game for Windows: run a refueling space station deep in debt, refuel and repair ships, hire your crew, fight off pirates and buy the station. World leaderboard, wiki, in English and French.">
+<meta name="twitter:image" content="https://dockfall.netlify.app/images/en/station.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"Dockfall","url":"https://dockfall.netlify.app/en/","description":"Dockfall is a free pixel-art roguelite management game for Windows: run a refueling space station deep in debt, refuel and repair ships, hire your crew, fight off pirates and buy the station. World leaderboard, wiki, in English and French.","image":"https://dockfall.netlify.app/images/en/station.png","screenshot":["https://dockfall.netlify.app/images/station.png","https://dockfall.netlify.app/images/incendie.png","https://dockfall.netlify.app/images/abordage.png","https://dockfall.netlify.app/images/voisinage.png"],"genre":["Management","Simulation","Roguelite","Strategy"],"gamePlatform":["PC","Windows"],"operatingSystem":"Windows 10, Windows 11","applicationCategory":"GameApplication","playMode":"SinglePlayer","inLanguage":["fr","en"],"softwareVersion":"0.14","downloadUrl":"https://dockfall.netlify.app/telechargement/Dockfall-windows.zip","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR","availability":"https://schema.org/InStock","url":"https://dockfall.netlify.app/en/#telecharger"},"publisher":{"@type":"Organization","name":"Dockfall","url":"https://dockfall.netlify.app/"}}</script>
 <link rel="icon" href="../images/icone.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -197,7 +220,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 <section class="vue wrap" id="vue-accueil" data-vue="accueil">
   <div class="une">
     <div class="pile">
-      <p class="surtitre">Management • roguelite • pixel art • Windows</p>
+      <p class="surtitre">Free game • space station management • roguelite • pixel art • Windows</p>
       <h1>A station.<br>A debt.<br>A record to beat.</h1>
       <p class="accroche">You take over the Relay, a refueling station lost in the belt, and the debt that comes with it. Refuel ships, repair their hulls, keep your crew alive and pay the Company. Buy the station after six deadlines, then carry on as owner: the goal is the highest score.</p>
       <p class="echeance" aria-label="Example deadline"><b>DEADLINE</b> <span>1/6 • 2,000 ¢ • <span id="compte">7.0</span> cycles</span></p>
@@ -269,7 +292,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   <div class="dl">
     <div class="carte cyan">
       <dl class="fiche">
-        <dt>Version</dt><dd>Prototype 0.13</dd>
+        <dt>Version</dt><dd>Prototype 0.14</dd>
         <dt>System</dt><dd>Windows 10 or 11, 64-bit</dd>
         <dt>File</dt><dd><span id="dl-nom">Dockfall-windows.zip</span> • <span id="dl-taille">about 50 MB</span></dd>
         <dt>Languages</dt><dd>English, French</dd>
@@ -289,7 +312,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
         <li>Choose <i>New concession</i>. The tutorial guides you through your first run. The language can be changed in Options.</li>
       </ol>
       <p class="note">Save and settings: <code>%APPDATA%\Godot\app_userdata\Dockfall</code>. Delete this folder to start from scratch (licences and achievements included).</p>
-      <p class="note">Privacy: at the end of a run, the game sends anonymous numbers (length, how it ended, version) to help balance it; you can turn this off in Options. The leaderboard only uses the nickname you choose. No personal data is collected.</p>
+      <p class="note">Privacy: at the end of a run, the game sends an anonymous summary of the run (length, how it ended, what was built, key moments from the logbook, menus used) to help improve it; you can turn this off in Options. The leaderboard only uses the nickname you choose. No personal data is collected.</p>
     </div>
   </div>
   <div class="bande">
@@ -366,9 +389,10 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   </div>
   <div class="journal">
     <div class="version">
-      <div><p class="num">0.11 – 0.13</p><p class="date">November 2026</p></div>
+      <div><p class="num">0.11 – 0.14</p><p class="date">November 2026</p></div>
       <ul>
         <li><b>Daily concession</b>: the same start for everyone, with its own leaderboard.</li>
+        <li><b>Run summaries</b>: along with the anonymous stats, a short summary of every run (even abandoned ones) to spot what gets players stuck and what the game is missing.</li>
         <li><b>The Relay mystery</b>: eight fragments of Elias Varn’s journal, the former manager, to discover by playing and reread in the Archives menu.</li>
         <li><b>Crew reactions</b>: small icons above heads (alert, nickname, friendship, mourning).</li>
         <li><b>Crew stories</b>: nicknames earned through feats, friendships, a memorial, and a logbook for every run.</li>
@@ -451,7 +475,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
 <footer>
   <div class="wrap">
-    <span>Dockfall • prototype 0.13 • made with Godot 4</span>
+    <span>Dockfall • prototype 0.14 • made with Godot 4</span>
     <span>Site fonts: VT323 and IBM Plex (OFL license)</span>
   </div>
 </footer>

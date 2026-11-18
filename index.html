@@ -5,9 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>html { -webkit-text-size-adjust: 100%; } body { margin: 0; } img { max-width: 100%; } [hidden] { display: none !important; }
 :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }</style>
-<title>Dockfall</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Dockfall : gère une station de ravitaillement endettée auprès de la Compagnie. Jeu de gestion roguelite en pixel art pour Windows.">
+<title>Dockfall • Jeu gratuit de gestion de station spatiale roguelite (Windows)</title>
+<meta name="description" content="Dockfall est un jeu de gestion roguelite gratuit en pixel art pour Windows : dirige une station spatiale de ravitaillement endettée, ravitaille et répare les vaisseaux, recrute ton équipage, repousse les pirates et rachète la station. Classement mondial, wiki, en français et en anglais.">
+<meta name="keywords" content="dockfall, jeu de gestion, jeu de gestion gratuit, station spatiale, gestion de station spatiale, roguelite, roguelike, jeu pixel art, jeu indépendant, jeu indé, jeu PC gratuit, jeu Windows, simulation spatiale, tycoon, jeu de survie spatiale, Godot">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#07090f">
+<link rel="canonical" href="https://dockfall.netlify.app/">
+<link rel="alternate" hreflang="fr" href="https://dockfall.netlify.app/">
+<link rel="alternate" hreflang="en" href="https://dockfall.netlify.app/en/">
+<link rel="alternate" hreflang="x-default" href="https://dockfall.netlify.app/en/">
+<link rel="apple-touch-icon" href="https://dockfall.netlify.app/images/icone.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Dockfall">
+<meta property="og:title" content="Dockfall • Jeu gratuit de gestion de station spatiale roguelite (Windows)">
+<meta property="og:description" content="Dockfall est un jeu de gestion roguelite gratuit en pixel art pour Windows : dirige une station spatiale de ravitaillement endettée, ravitaille et répare les vaisseaux, recrute ton équipage, repousse les pirates et rachète la station. Classement mondial, wiki, en français et en anglais.">
+<meta property="og:url" content="https://dockfall.netlify.app/">
+<meta property="og:image" content="https://dockfall.netlify.app/images/station.png">
+<meta property="og:image:width" content="1440">
+<meta property="og:image:height" content="810">
+<meta property="og:image:alt" content="Une partie de Dockfall : la station spatiale en coupe, des vaisseaux à quai.">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:locale:alternate" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Dockfall • Jeu gratuit de gestion de station spatiale roguelite (Windows)">
+<meta name="twitter:description" content="Dockfall est un jeu de gestion roguelite gratuit en pixel art pour Windows : dirige une station spatiale de ravitaillement endettée, ravitaille et répare les vaisseaux, recrute ton équipage, repousse les pirates et rachète la station. Classement mondial, wiki, en français et en anglais.">
+<meta name="twitter:image" content="https://dockfall.netlify.app/images/station.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"Dockfall","url":"https://dockfall.netlify.app/","description":"Dockfall est un jeu de gestion roguelite gratuit en pixel art pour Windows : dirige une station spatiale de ravitaillement endettée, ravitaille et répare les vaisseaux, recrute ton équipage, repousse les pirates et rachète la station. Classement mondial, wiki, en français et en anglais.","image":"https://dockfall.netlify.app/images/station.png","screenshot":["https://dockfall.netlify.app/images/station.png","https://dockfall.netlify.app/images/incendie.png","https://dockfall.netlify.app/images/abordage.png","https://dockfall.netlify.app/images/voisinage.png"],"genre":["Gestion","Simulation","Roguelite","Stratégie"],"gamePlatform":["PC","Windows"],"operatingSystem":"Windows 10, Windows 11","applicationCategory":"GameApplication","playMode":"SinglePlayer","inLanguage":["fr","en"],"softwareVersion":"0.14","downloadUrl":"https://dockfall.netlify.app/telechargement/Dockfall-windows.zip","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR","availability":"https://schema.org/InStock","url":"https://dockfall.netlify.app/#telecharger"},"publisher":{"@type":"Organization","name":"Dockfall","url":"https://dockfall.netlify.app/"}}</script>
 <link rel="icon" href="images/icone.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -197,7 +220,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 <section class="vue wrap" id="vue-accueil" data-vue="accueil">
   <div class="une">
     <div class="pile">
-      <p class="surtitre">Gestion • roguelite • pixel art • Windows</p>
+      <p class="surtitre">Jeu gratuit • gestion de station spatiale • roguelite • pixel art • Windows</p>
       <h1>Une station.<br>Une dette.<br>Un record à battre.</h1>
       <p class="accroche">Tu reprends le Relais, une station de ravitaillement perdue dans la ceinture, et la dette qui va avec. Fais le plein des vaisseaux, répare leurs coques, garde ton équipage en vie et paie la Compagnie. Rachète la station au bout de six échéances, puis continue en propriétaire : le but, c'est le plus gros score.</p>
       <p class="echeance" aria-label="Exemple d'échéance"><b>ÉCHÉANCE</b> <span>1/6 • 2 000 ¢ • <span id="compte">7,0</span> cycles</span></p>
@@ -269,7 +292,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   <div class="dl">
     <div class="carte cyan">
       <dl class="fiche">
-        <dt>Version</dt><dd>Prototype 0.13</dd>
+        <dt>Version</dt><dd>Prototype 0.14</dd>
         <dt>Système</dt><dd>Windows 10 ou 11, 64 bits</dd>
         <dt>Fichier</dt><dd><span id="dl-nom">Dockfall-windows.zip</span> • <span id="dl-taille">environ 50 Mo</span></dd>
         <dt>Langue</dt><dd>Français, anglais</dd>
@@ -289,7 +312,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
         <li>Choisis <i>Nouvelle concession</i>. Le tutoriel t'accompagne pendant la première partie.</li>
       </ol>
       <p class="note">Sauvegarde et réglages : <code>%APPDATA%\Godot\app_userdata\Dockfall</code>. Supprime ce dossier pour repartir de zéro (licences et succès compris).</p>
-      <p class="note">Vie privée : en fin de partie, le jeu envoie des chiffres anonymes (durée, cause de fin, version) pour aider à l'équilibrer ; tu peux les couper dans Options. Le classement n'utilise que le pseudo que tu choisis. Aucune donnée personnelle n'est collectée.</p>
+      <p class="note">Vie privée : en fin de partie, le jeu envoie un résumé anonyme de la partie (durée, cause de fin, ce qui a été construit, les grands moments du journal de bord, les menus utilisés) pour aider à l'améliorer ; tu peux les couper dans Options. Le classement n'utilise que le pseudo que tu choisis. Aucune donnée personnelle n'est collectée.</p>
     </div>
   </div>
   <div class="bande">
@@ -366,9 +389,10 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   </div>
   <div class="journal">
     <div class="version">
-      <div><p class="num">0.11 – 0.13</p><p class="date">Novembre 2026</p></div>
+      <div><p class="num">0.11 – 0.14</p><p class="date">Novembre 2026</p></div>
       <ul>
         <li><b>Concession du jour</b> : même départ pour tout le monde, avec son propre classement.</li>
+        <li><b>Résumés de parties</b> : avec les statistiques anonymes, un court résumé de chaque partie (même abandonnée) pour repérer ce qui bloque et ce qui manque au jeu.</li>
         <li><b>Le mystère du Relais</b> : huit fragments du journal d’Elias Varn, l’ancien gérant, à découvrir en jouant et à relire dans le menu Archives.</li>
         <li><b>Réactions de l’équipage</b> : petites icônes au-dessus des têtes (alerte, surnom, amitié, deuil).</li>
         <li><b>Histoires d’équipage</b> : surnoms gagnés par les exploits, amitiés, mémorial, et un journal de bord de chaque partie.</li>
@@ -468,7 +492,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
 <footer>
   <div class="wrap">
-    <span>Dockfall • prototype 0.13 • fait avec Godot 4</span>
+    <span>Dockfall • prototype 0.14 • fait avec Godot 4</span>
     <span>Police du site : VT323 et IBM Plex (licence OFL)</span>
   </div>
 </footer>
@@ -478,7 +502,8 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   // langue : la première visite suit la langue du navigateur, ensuite le choix fait avec FR | EN
   let choix = null;
   try { choix = localStorage.getItem('dockfall-langue'); } catch (e) {}
-  if (!choix && !/^fr/i.test(navigator.language || 'fr')) { location.replace('en/' + location.hash); return; }
+  const robot = /bot|crawl|spider|slurp|lighthouse|facebookexternalhit|embedly|preview/i.test(navigator.userAgent || '') || navigator.webdriver;
+  if (!choix && !robot && !/^fr/i.test(navigator.language || 'fr')) { location.replace('en/' + location.hash); return; }
   document.querySelectorAll('a.langue').forEach(a => a.addEventListener('click', () => {
     try { localStorage.setItem('dockfall-langue', a.dataset.langue); } catch (e) {}
     a.href = a.getAttribute('href').split('#')[0] + location.hash;

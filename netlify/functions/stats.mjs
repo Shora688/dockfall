@@ -3,6 +3,11 @@
 // GET  /api/stats   -> résumé public : nombre de parties, durée moyenne, causes de fin, échéance atteinte, par version
 // Stockage : Netlify Blobs, magasin « statistiques », une entrée par mois (500 parties max par mois et par version gardées en détail).
 import { getStore } from "@netlify/blobs";
+import { createHash } from "node:crypto";
+
+// Lecture privée des résumés de parties (GET /api/stats?resumes=AAAA-MM&cle=…) : seule l empreinte de la clé est ici.
+const EMPREINTE_CLE = "31ffddb5772e188e5c1d9e6bf7fe6082dc62cd630ad81fbc6ee0b02a1a8631d3";
+const RESUME_MAX = 40000;   // octets ; un résumé normal en fait 3 à 15
 
 const ENTETES = {
   "content-type": "application/json; charset=utf-8",
@@ -12,7 +17,7 @@ const ENTETES = {
   "cache-control": "no-store",
 };
 const repondre = (corps, statut = 200) => new Response(JSON.stringify(corps), { status: statut, headers: ENTETES });
-const CAUSES = ["echeances", "taxes", "equipage", "retraite", "vente", "autre"];
+const CAUSES = ["echeances", "taxes", "equipage", "retraite", "vente", "abandon", "autre"];
 const MAX_PAR_MOIS = 5000;
 
 const entier = (v, min, max) => Math.min(Math.max(Math.floor(Number(v) || 0), min), max);
@@ -23,6 +28,25 @@ export default async (req) => {
   const store = getStore({ name: "statistiques", consistency: "strong" });
 
   if (req.method === "GET") {
+    const params = new URL(req.url).searchParams;
+    if (params.has("resumes") || params.has("avis")) {
+      const cle = params.get("cle") || "";
+      if (createHash("sha256").update(cle).digest("hex") !== EMPREINTE_CLE) return repondre({ erreur: "Accès refusé." }, 403);
+      if (params.has("avis")) {
+        const magasin = getStore({ name: "avis", consistency: "strong" });
+        const { blobs: liste } = await magasin.list();
+        const avis = [];
+        for (const b of liste) avis.push(await magasin.get(b.key, { type: "json" }));
+        return repondre({ avis });
+      }
+      const resumes = getStore({ name: "resumes", consistency: "strong" });
+      const { blobs: liste } = await resumes.list({ prefix: (params.get("resumes") || "") });
+      const apres = params.get("apres") || "";
+      const cles = liste.map((b) => b.key).sort().filter((k) => k > apres).slice(0, 300);
+      const parties = [];
+      for (const k of cles) parties.push({ cle: k, ...(await resumes.get(k, { type: "json" })) });
+      return repondre({ total: liste.length, parties, suite: cles.length === 300 ? cles[cles.length - 1] : "" });
+    }
     const { blobs } = await store.list();
     const parties = [];
     for (const b of blobs) parties.push(...((await store.get(b.key, { type: "json" })) || []));
@@ -64,11 +88,19 @@ export default async (req) => {
     proprietaire: Boolean(d.proprietaire),
     date: Date.now(),
   };
-  if (new URL(req.url).searchParams.get("essai") === "1") return repondre({ essai: true, partie });
+  if (new URL(req.url).searchParams.get("essai") === "1") return repondre({ essai: true, partie, resume: d.resume ? JSON.stringify(d.resume).length : 0 });
   const cle = "parties-" + new Date().toISOString().slice(0, 7);
   const liste = (await store.get(cle, { type: "json" })) || [];
   liste.push(partie);
   await store.setJSON(cle, liste.slice(-MAX_PAR_MOIS));
+  // le résumé détaillé de la partie, à part (une entrée par partie) pour ne pas alourdir les chiffres publics
+  if (d.resume && typeof d.resume === "object") {
+    const texte = JSON.stringify(d.resume);
+    if (texte.length <= RESUME_MAX) {
+      const resumes = getStore({ name: "resumes", consistency: "strong" });
+      await resumes.setJSON(new Date().toISOString().slice(0, 7) + "/" + partie.date + "-" + partie.id, { ...partie, resume: d.resume });
+    }
+  }
   return repondre({ ok: true });
 };
 
