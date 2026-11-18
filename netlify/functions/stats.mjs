@@ -33,10 +33,10 @@ export default async (req) => {
       const cle = params.get("cle") || "";
       if (createHash("sha256").update(cle).digest("hex") !== EMPREINTE_CLE) return repondre({ erreur: "Accès refusé." }, 403);
       if (params.has("avis")) {
-        const magasin = getStore({ name: "avis", consistency: "strong" });
-        const { blobs: liste } = await magasin.list();
+        const boite = getStore({ name: "avis", consistency: "strong" });
+        const { blobs: liste } = await boite.list();
         const avis = [];
-        for (const b of liste) avis.push(await magasin.get(b.key, { type: "json" }));
+        for (const b of liste) avis.push(await boite.get(b.key, { type: "json" }));
         return repondre({ avis });
       }
       const resumes = getStore({ name: "resumes", consistency: "strong" });

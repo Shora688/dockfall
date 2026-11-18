@@ -1,0 +1,4 @@
+# Cloudflare Pages : version.json est lu par le jeu au démarrage, jamais de cache.
+/version.json
+  Cache-Control: no-store
+  Access-Control-Allow-Origin: *

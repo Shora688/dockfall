@@ -15,9 +15,9 @@ You take over the Relay, a refueling station lost in the asteroid belt, and the 
 
 Free • Windows 10/11 • English and French • automatic updates
 
-## ▶ [Download, wiki and leaderboard: dockfall.netlify.app](https://dockfall.netlify.app/en/)
+## ▶ [Download, wiki and leaderboard: dockfall.pages.dev](https://dockfall.pages.dev/en/)
 
-[Version française](https://dockfall.netlify.app/) • [Press kit](https://dockfall.netlify.app/en/#presse)
+[Version française](https://dockfall.pages.dev/) • [Press kit](https://dockfall.pages.dev/en/#presse)
 
 ---
 

@@ -3,4 +3,4 @@ Allow: /
 Disallow: /api/
 Disallow: /telechargement/
 
-Sitemap: https://dockfall.netlify.app/sitemap.xml
+Sitemap: https://dockfall.pages.dev/sitemap.xml

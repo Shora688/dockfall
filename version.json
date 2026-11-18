@@ -1,7 +1,7 @@
 {
   "version": "0.16",
   "date": "2026-11-18",
-  "url": "https://dockfall.netlify.app/#telecharger",
-  "zip": "https://dockfall.netlify.app/api/telecharger?source=maj",
-  "sha256": "2a9ae97061b6269227dd6d0ced02fa98d65070d651fcb5b82be6509d60289e33"
+  "url": "https://dockfall.pages.dev/#telecharger",
+  "zip": "https://dockfall.pages.dev/api/telecharger?source=maj",
+  "sha256": "4c8fd328acf36f61cee27ea3fd36353e4c65c728b60a0f10c40b9baa5e99e369"
 }
