@@ -1,0 +1,650 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>html { -webkit-text-size-adjust: 100%; } body { margin: 0; } img { max-width: 100%; } [hidden] { display: none !important; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }</style>
+<title>Dockfall</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Dockfall : gère une station de ravitaillement endettée auprès de la Compagnie. Jeu de gestion roguelite en pixel art pour Windows.">
+<link rel="icon" href="images/icone.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Mise en page : un terminal de station. Barre d'onglets collante comme la barre du jeu, contenu en colonne,
+   le wiki en deux colonnes (sommaire + article). Thème unique sombre : c'est l'espace, comme dans le jeu. */
+:root {
+  --bg: #07090f; --panel: #0d1119; --panel-2: #131925; --line: #222a39; --line-2: #313b4f;
+  --ink: #e8e3d5; --text: #cfd4de; --quiet: #98a1b3; --dim: #6b7487;
+  --cyan: #4fd1c5; --cyan-deep: #123a37; --amber: #f5a524; --red: #e5484d; --red-ink: #ffd0d0;
+  --gold: #f5c542; --green: #8fd16a; --company: #9fb4d0; --vega: #c78bff;
+  --f-pixel: 'VT323', 'Courier New', monospace;
+  --f-body: 'IBM Plex Sans', system-ui, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 72px; }
+body { background: var(--bg); color: var(--text); font: 16px/1.6 var(--f-body); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--panel); }
+a { color: var(--cyan); }
+a:hover { color: var(--ink); }
+:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+img.pixel { image-rendering: pixelated; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.etoiles { position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background-image: radial-gradient(1px 1px at 12% 18%, #8b94a7 50%, transparent 51%), radial-gradient(1px 1px at 72% 9%, #c9d0dc 50%, transparent 51%),
+    radial-gradient(1px 1px at 33% 62%, #6b7487 50%, transparent 51%), radial-gradient(1px 1px at 88% 44%, #8b94a7 50%, transparent 51%),
+    radial-gradient(1px 1px at 52% 84%, #c9d0dc 50%, transparent 51%), radial-gradient(1px 1px at 6% 91%, #6b7487 50%, transparent 51%),
+    radial-gradient(1px 1px at 94% 78%, #6b7487 50%, transparent 51%), radial-gradient(1px 1px at 61% 33%, #8b94a7 50%, transparent 51%);
+  background-size: 420px 420px; }
+
+/* --- barre d'onglets ------------------------------------------------------------- */
+header.barre { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--panel) 94%, transparent); border-bottom: 1px solid var(--line); backdrop-filter: blur(6px); }
+header.barre .wrap { display: flex; align-items: center; gap: 20px; min-height: 56px; flex-wrap: wrap; }
+.logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font: 30px/1 var(--f-pixel); letter-spacing: 0.04em; }
+.logo img { width: 28px; height: 28px; }
+nav.onglets { display: flex; gap: 2px; flex-wrap: wrap; margin-left: auto; }
+nav.onglets a { font: 22px/1 var(--f-pixel); color: var(--quiet); text-decoration: none; padding: 8px 12px; border: 1px solid transparent; }
+nav.onglets a:hover { color: var(--ink); border-color: var(--line-2); }
+nav.onglets a[aria-current="page"] { color: var(--cyan); border-color: var(--cyan); background: var(--cyan-deep); }
+
+/* --- éléments communs ------------------------------------------------------------- */
+.vue[hidden] { display: none !important; }
+.vue { padding-block: 40px 72px; }
+h1, h2, h3 { font-family: var(--f-pixel); font-weight: 400; color: var(--ink); text-wrap: balance; margin: 0; letter-spacing: 0.02em; }
+h1 { font-size: clamp(44px, 7vw, 76px); line-height: 0.95; }
+h2 { font-size: 40px; line-height: 1; }
+h3 { font-size: 28px; line-height: 1.05; }
+p { margin: 0; }
+.surtitre { font: 500 12px/1.2 var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--cyan); }
+.calme { color: var(--quiet); }
+.lecture { max-width: 66ch; }
+.pile { display: flex; flex-direction: column; gap: 14px; }
+.bouton { display: inline-flex; align-items: center; gap: 10px; font: 24px/1 var(--f-pixel); padding: 12px 18px; text-decoration: none; border: 1px solid var(--line-2); color: var(--ink); background: var(--panel-2); cursor: pointer; }
+.bouton:hover { border-color: var(--cyan); color: var(--ink); }
+.bouton.principal { background: var(--cyan-deep); border-color: var(--cyan); color: var(--ink); }
+.bouton.principal:hover { background: #1a4d49; }
+.bouton[aria-disabled="true"] { opacity: 0.5; pointer-events: none; }
+.rangee { display: flex; flex-wrap: wrap; gap: 10px; }
+.capture { display: block; width: 100%; height: auto; border: 1px solid var(--line-2); background: #000; }
+figure { margin: 0; }
+figcaption { font: 13px/1.4 var(--f-mono); color: var(--quiet); margin-top: 8px; }
+.citation { border-left: 2px solid var(--company); padding: 4px 0 4px 18px; font-size: 18px; color: var(--company); max-width: 60ch; }
+.citation cite { display: block; margin-top: 6px; font: 500 12px/1.2 var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase; font-style: normal; color: var(--quiet); }
+
+/* --- accueil ------------------------------------------------------------- */
+.une { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 40px; align-items: center; padding-top: 16px; }
+.une .pile { gap: 20px; }
+.une .accroche { font-size: 19px; color: var(--text); max-width: 46ch; }
+.echeance { display: inline-flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; padding: 6px 12px; background: #1a0f12; border: 1px solid #5a2a2e; font: 22px/1 var(--f-pixel); width: fit-content; }
+.echeance b { color: var(--red); font-weight: 400; }
+.echeance span { color: var(--red-ink); font-variant-numeric: tabular-nums; }
+.station { position: relative; }
+.station img { width: 100%; height: auto; display: block; }
+.station .balise { position: absolute; left: 53.62%; top: 11.43%; width: 1.16%; height: 1.15%; background: var(--red); animation: balise 1.4s steps(1) infinite; }
+@keyframes balise { 50% { opacity: 0; } }
+.trois { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 28px; }
+.atout { display: flex; flex-direction: column; gap: 10px; }
+.atout h3 { font-size: 30px; }
+.bande { margin-top: 64px; display: flex; flex-direction: column; gap: 28px; }
+.visages { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+.visage { display: flex; gap: 12px; align-items: center; padding: 10px; background: var(--panel); border: 1px solid var(--line); }
+.visage img { width: 48px; height: 48px; flex: none; background: var(--panel-2); }
+.visage b { display: block; font: 22px/1 var(--f-pixel); color: var(--ink); font-weight: 400; }
+.visage small { display: block; font-size: 12.5px; line-height: 1.3; color: var(--quiet); margin-top: 3px; }
+
+/* --- téléchargement ------------------------------------------------------------- */
+.dl { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+.carte { background: var(--panel); border: 1px solid var(--line); padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+.carte.cyan { border-color: var(--cyan); }
+.fiche { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 18px; font: 14px/1.5 var(--f-mono); margin: 0; }
+.fiche dt { color: var(--quiet); }
+.fiche dd { margin: 0; color: var(--ink); font-variant-numeric: tabular-nums; }
+ol.etapes { margin: 0; padding-left: 1.4em; display: flex; flex-direction: column; gap: 8px; }
+.note { font-size: 14px; color: var(--quiet); }
+.note.alerte { color: var(--amber); }
+code, kbd { font: 13.5px/1.4 var(--f-mono); background: var(--panel-2); border: 1px solid var(--line-2); padding: 1px 6px; color: var(--ink); word-break: break-all; }
+kbd { word-break: normal; }
+
+/* --- wiki ------------------------------------------------------------- */
+.wiki { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 40px; align-items: start; }
+.sommaire { position: sticky; top: calc(76px + env(safe-area-inset-top, 0px)); display: flex; flex-direction: column; gap: 2px; max-height: calc(100vh - 100px); overflow-y: auto; }
+.sommaire .groupe { font: 500 11px/1 var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); margin: 14px 0 6px; }
+.sommaire .groupe:first-child { margin-top: 0; }
+.sommaire a { font: 21px/1.15 var(--f-pixel); color: var(--quiet); text-decoration: none; padding: 4px 10px; border-left: 2px solid transparent; }
+.sommaire a:hover { color: var(--ink); }
+.sommaire a[aria-current="true"] { color: var(--cyan); border-left-color: var(--cyan); background: var(--panel); }
+article.page { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+article.page h2 { margin-bottom: 2px; }
+article.page h3 { margin-top: 14px; font-size: 26px; color: var(--cyan); }
+article.page p, article.page li { max-width: 70ch; }
+article.page ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px; }
+.tableau { overflow-x: auto; border: 1px solid var(--line); }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 500 11.5px/1.3 var(--f-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--quiet); background: var(--panel); white-space: nowrap; }
+td.n { font-family: var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ink); }
+tr:last-child td { border-bottom: 0; }
+.pastille { display: inline-block; width: 10px; height: 10px; margin-right: 8px; vertical-align: 1px; }
+.rar { font: 20px/1 var(--f-pixel); }
+.encart { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--cyan); padding: 14px 16px; font-size: 15px; max-width: 70ch; }
+.encart.compagnie { border-left-color: var(--company); }
+.suite { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 18px; margin-top: 10px; }
+.suite a { font: 22px/1 var(--f-pixel); text-decoration: none; }
+.perso { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 16px; align-items: start; padding: 14px; background: var(--panel); border: 1px solid var(--line); }
+.perso img { width: 64px; height: 64px; background: var(--panel-2); }
+.perso b { font: 26px/1 var(--f-pixel); color: var(--ink); font-weight: 400; }
+.perso .role { font: 12px/1.3 var(--f-mono); color: var(--quiet); text-transform: uppercase; letter-spacing: 0.1em; margin: 4px 0 8px; }
+.grille-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+
+/* --- captures ------------------------------------------------------------- */
+.galerie { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 24px; }
+.galerie button { all: unset; cursor: zoom-in; display: block; }
+.galerie button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+dialog { padding: 0; border: 1px solid var(--line-2); background: var(--bg); max-width: min(1440px, 96vw); }
+dialog::backdrop { background: rgba(4, 6, 10, 0.88); }
+dialog img { display: block; width: 100%; height: auto; }
+dialog form { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; }
+dialog p { font: 14px/1.4 var(--f-mono); color: var(--quiet); }
+
+/* --- nouveautés ------------------------------------------------------------- */
+.journal { display: flex; flex-direction: column; gap: 40px; max-width: 760px; }
+.version { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 24px; }
+.version .num { font: 34px/1 var(--f-pixel); color: var(--ink); }
+.version .date { font: 12.5px/1.4 var(--f-mono); color: var(--quiet); margin-top: 6px; }
+.version ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 8px; }
+.version li b { color: var(--ink); font-weight: 600; }
+
+footer { border-top: 1px solid var(--line); padding-block: 28px 40px; font: 13px/1.6 var(--f-mono); color: var(--dim); }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 24px; }
+
+@media (max-width: 860px) {
+  .une, .dl, .wiki { grid-template-columns: minmax(0, 1fr); }
+  .sommaire { position: static; max-height: none; flex-direction: row; flex-wrap: wrap; gap: 4px; }
+  .sommaire .groupe { width: 100%; margin: 8px 0 2px; }
+  .sommaire a { border-left: 0; border: 1px solid var(--line); }
+  .sommaire a[aria-current="true"] { border-color: var(--cyan); }
+  .trois, .galerie, .grille-2 { grid-template-columns: minmax(0, 1fr); }
+  .version { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  nav.onglets { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .station .balise { animation: none; } }
+</style>
+</head>
+<body>
+<div class="etoiles" aria-hidden="true"></div>
+
+<header class="barre">
+  <div class="wrap">
+    <a class="logo" href="#accueil"><img class="pixel" src="images/icone.png" alt="">DOCKFALL</a>
+    <nav class="onglets" aria-label="Sections du site">
+      <a href="#accueil" data-onglet="accueil">Accueil</a>
+      <a href="#telecharger" data-onglet="telecharger">Télécharger</a>
+      <a href="#wiki" data-onglet="wiki">Wiki</a>
+      <a href="#captures" data-onglet="captures">Captures</a>
+      <a href="#nouveautes" data-onglet="nouveautes">Nouveautés</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<!-- ============================== ACCUEIL ============================== -->
+<section class="vue wrap" id="vue-accueil" data-vue="accueil">
+  <div class="une">
+    <div class="pile">
+      <p class="surtitre">Gestion • roguelite • pixel art • Windows</p>
+      <h1>Une station.<br>Une dette.<br>Un record à battre.</h1>
+      <p class="accroche">Tu reprends le Relais, une station de ravitaillement perdue dans la ceinture, et la dette qui va avec. Fais le plein des vaisseaux, répare leurs coques, garde ton équipage en vie et paie la Compagnie. Rachète la station au bout de six échéances, puis continue en propriétaire : le but, c'est le plus gros score.</p>
+      <p class="echeance" aria-label="Exemple d'échéance"><b>ÉCHÉANCE</b> <span>1/6 • 2 000 ¢ • <span id="compte">7,0</span> cycles</span></p>
+      <div class="rangee">
+        <a class="bouton principal" href="#telecharger">Télécharger pour Windows</a>
+        <a class="bouton" href="#wiki">Lire le wiki</a>
+      </div>
+    </div>
+    <div class="station">
+      <img class="pixel" src="images/station_art.png" alt="Le Relais en coupe : trois étages de modules, l'ascenseur au centre et un cargo amarré à droite." width="690" height="350">
+      <span class="balise" aria-hidden="true"></span>
+    </div>
+  </div>
+
+  <div class="bande">
+    <figure>
+      <img class="capture" src="images/station.png" alt="Une partie en cours : la station en coupe, deux paquebots à quai, la barre des ressources en haut." loading="lazy" width="1440" height="810">
+      <figcaption>Cycle 9 : deux paquebots font le plein, la caisse est à 9 969 ¢ et la deuxième échéance tombe dans 4 cycles.</figcaption>
+    </figure>
+  </div>
+
+  <div class="bande">
+    <h2>Ce que tu fais au Relais</h2>
+    <div class="trois">
+      <div class="atout">
+        <h3>Vendre à prix juste</h3>
+        <p>Chaque vaisseau paie l'amarrage, le carburant, les réparations, le commerce et les soins au prix que tu fixes, au crédit près. Trop cher, il file chez Vega, le comptoir d'en face. Pas assez cher, tu travailles pour rien.</p>
+      </div>
+      <div class="atout">
+        <h3>Construire et améliorer</h3>
+        <p>Quais, atelier, recycleur d'oxygène, quartiers, marché, poste de sécurité, réacteur… Agrandis la station étage par étage et monte chaque module jusqu'au niveau 3. Garde un œil sur l'énergie : en déficit, des modules s'éteignent.</p>
+      </div>
+      <div class="atout">
+        <h3>Tenir une équipe</h3>
+        <p>Humains, Velkans, Ossarites, Thuuls : chacun a un métier, un caractère et une rareté, du commun au légendaire. Ils se fatiguent, perdent le moral et se laissent parfois débaucher par Vega.</p>
+      </div>
+      <div class="atout">
+        <h3>Encaisser les coups</h3>
+        <p>Un incendie gagne l'atelier, trois pirates montent à bord, un inspecteur fouille tes cales. Tu envoies l'équipe, tu sonnes l'alerte, tu négocies. Et entre deux crises, Vasko Hale vient prendre des nouvelles de ta caisse.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bande">
+    <blockquote class="citation">« Chaque station finit par tomber. La vôtre peut choisir quand. »<cite>Vasko Hale • la Compagnie</cite></blockquote>
+  </div>
+
+  <div class="bande">
+    <h2>Ceux que tu croiseras</h2>
+    <div class="visages">
+      <div class="visage"><img class="pixel" src="portraits/vasko_hale.png" alt=""><div><b>Vasko Hale</b><small>Directeur, la Compagnie</small></div></div>
+      <div class="visage"><img class="pixel" src="portraits/ines_calder.png" alt=""><div><b>Ines Calder</b><small>Gérante du Comptoir Vega</small></div></div>
+      <div class="visage"><img class="pixel" src="portraits/mara_ilves.png" alt=""><div><b>Mara Ilves</b><small>Mécanicienne</small></div></div>
+      <div class="visage"><img class="pixel" src="portraits/oskar_brenn.png" alt=""><div><b>Oskar Brenn</b><small>Capitaine du mineur Tarn-4</small></div></div>
+      <div class="visage"><img class="pixel" src="portraits/lyra_vance.png" alt=""><div><b>Lyra Vance</b><small>Capitaine du paquebot Aurélie</small></div></div>
+      <div class="visage"><img class="pixel" src="portraits/sef_fantome.png" alt=""><div><b>Sef « Fantôme »</b><small>Contrebandier du Nox</small></div></div>
+    </div>
+    <div class="rangee"><a class="bouton" href="#wiki-personnages">Tous les personnages</a></div>
+  </div>
+</section>
+
+<!-- ============================== TÉLÉCHARGER ============================== -->
+<section class="vue wrap" id="vue-telecharger" data-vue="telecharger" hidden>
+  <div class="pile" style="margin-bottom: 32px">
+    <p class="surtitre">Télécharger</p>
+    <h2>Dockfall pour Windows</h2>
+    <p class="lecture calme">Le jeu tient dans un seul fichier, sans installation. Ta partie est sauvegardée à chaque fin de cycle et quand tu quittes.</p>
+  </div>
+  <div class="dl">
+    <div class="carte cyan">
+      <dl class="fiche">
+        <dt>Version</dt><dd>Prototype 0.3</dd>
+        <dt>Système</dt><dd>Windows 10 ou 11, 64 bits</dd>
+        <dt>Fichier</dt><dd><span id="dl-nom">Dockfall-windows.zip</span> • <span id="dl-taille">environ 50 Mo</span></dd>
+        <dt>Langue</dt><dd>Français</dd>
+        <dt>Prix</dt><dd>Gratuit</dd>
+      </dl>
+      <div class="rangee">
+        <a class="bouton principal" id="dl-bouton" href="telechargement/Dockfall-windows.zip">Télécharger le jeu</a>
+      </div>
+      <p class="note" id="dl-note" hidden></p>
+    </div>
+    <div class="carte">
+      <h3>Installer et lancer</h3>
+      <ol class="etapes">
+        <li>Décompresse l'archive où tu veux (clic droit, <i>Extraire tout</i>).</li>
+        <li>Lance <code>Dockfall.exe</code>.</li>
+        <li>Si Windows affiche « Windows a protégé votre ordinateur », clique sur <i>Informations complémentaires</i> puis <i>Exécuter quand même</i>. Le jeu n'est pas encore signé, d'où l'avertissement.</li>
+        <li>Choisis <i>Nouvelle concession</i>. Le tutoriel t'accompagne pendant la première partie.</li>
+      </ol>
+      <p class="note">Sauvegarde et réglages : <code>%APPDATA%\Godot\app_userdata\Dockfall</code>. Supprime ce dossier pour repartir de zéro (licences et succès compris).</p>
+    </div>
+  </div>
+  <div class="bande">
+    <h3>Configuration conseillée</h3>
+    <div class="tableau">
+      <table>
+        <thead><tr><th>Élément</th><th>Minimum</th></tr></thead>
+        <tbody>
+          <tr><td>Processeur</td><td>Double cœur, 2 GHz</td></tr>
+          <tr><td>Mémoire</td><td>2 Go</td></tr>
+          <tr><td>Carte graphique</td><td>Compatible Vulkan ou OpenGL 3.3</td></tr>
+          <tr><td>Écran</td><td>1280 × 720 ou plus (fenêtre ou plein écran avec F11)</td></tr>
+          <tr><td>Espace disque</td><td>150 Mo</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== WIKI ============================== -->
+<section class="vue wrap" id="vue-wiki" data-vue="wiki" hidden>
+  <div class="wiki">
+    <nav class="sommaire" aria-label="Articles du wiki" id="sommaire"></nav>
+    <article class="page" id="article" aria-live="polite"></article>
+  </div>
+</section>
+
+<!-- ============================== CAPTURES ============================== -->
+<section class="vue wrap" id="vue-captures" data-vue="captures" hidden>
+  <div class="pile" style="margin-bottom: 32px">
+    <p class="surtitre">Captures</p>
+    <h2>Le Relais en images</h2>
+    <p class="calme">Toutes les images viennent du jeu, sans retouche. Clique pour agrandir.</p>
+  </div>
+  <div class="galerie" id="galerie"></div>
+  <dialog id="visionneuse">
+    <img id="visionneuse-img" alt="">
+    <form method="dialog"><p id="visionneuse-txt"></p><button class="bouton" value="fermer">Fermer</button></form>
+  </dialog>
+</section>
+
+<!-- ============================== NOUVEAUTÉS ============================== -->
+<section class="vue wrap" id="vue-nouveautes" data-vue="nouveautes" hidden>
+  <div class="pile" style="margin-bottom: 36px">
+    <p class="surtitre">Nouveautés</p>
+    <h2>Journal des versions</h2>
+  </div>
+  <div class="journal">
+    <div class="version">
+      <div><p class="num">0.3</p><p class="date">Novembre 2026</p></div>
+      <ul>
+        <li><b>Le but, c'est le score.</b> Il s'affiche en direct en haut de l'écran, et l'écran de fin annonce les nouveaux records.</li>
+        <li><b>Mode propriétaire.</b> Après le rachat de la station, la partie continue : une taxe de secteur remplace les échéances, les licences s'achètent avec tes crédits, et tu pars à la retraite quand tu veux.</li>
+        <li>Nouvelle touche <kbd>L</kbd> pour la boutique de licences.</li>
+      </ul>
+    </div>
+    <div class="version">
+      <div><p class="num">0.2</p><p class="date">Novembre 2026</p></div>
+      <ul>
+        <li><b>Le rachat.</b> Paie la sixième échéance et la station est à toi : score bonus, fanfare.</li>
+        <li><b>Menace 1 à 5.</b> Chaque victoire débloque un niveau de difficulté de plus : échéances plus lourdes, crises plus fréquentes, départ plus pauvre, Vasko plus rancunier, puis une seule échéance manquée et tout est perdu.</li>
+        <li><b>12 succès</b>, consultables depuis le menu principal.</li>
+        <li><b>Aide-mémoire</b> en jeu (touche H) et <b>touches modifiables</b> dans les options.</li>
+        <li><b>Missions</b> proposées par les personnages, rangées dans un volet qui sort du bord gauche (touche M).</li>
+        <li><b>Améliorations de modules</b> jusqu'au niveau 3.</li>
+        <li><b>Crises vivantes</b> : l'incendie se propage tant que l'équipe n'est pas envoyée, les pirates montent à bord et se battent.</li>
+        <li><b>Personnel</b> : raretés (commun à légendaire), employés extraterrestres, envoi au repos, panneau plus lisible.</li>
+        <li><b>Préparation</b> en deux étapes : le secteur, puis l'équipe parmi six candidats (trois nouveaux tirages possibles).</li>
+        <li>Bonus au choix après chaque échéance payée, prix réglables au crédit près, station plus grande, interventions des personnages à la radio.</li>
+      </ul>
+    </div>
+    <div class="version">
+      <div><p class="num">0.1</p><p class="date">Novembre 2026</p></div>
+      <ul>
+        <li>Premier prototype jouable : station en coupe, vaisseaux, tarifs, personnel, énergie et oxygène.</li>
+        <li>Échéances de la Compagnie, objectifs de période, événements à choix.</li>
+        <li>Licences gagnées en fin de partie : réacteur, cantine, nouveaux traits, secteurs du Nox et de Pell.</li>
+        <li>Sauvegarde automatique, tutoriel, musique et bruitages.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Dockfall • prototype 0.3 • fait avec Godot 4</span>
+    <span>Police du site : VT323 et IBM Plex (licence OFL)</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // ---------------------------------------------------------------- données du wiki (tirées des règles du jeu)
+  const MODULES = [
+    ['Panneau solaire', '4f79a8', 600, '+6', 5, 'Se pose sur le toit. Plus la station est large, plus il y a de place.'],
+    ['Recycleur d’O2', '2e7fa3', 900, '-3', 10, 'Renouvelle l’oxygène de 8 personnes, équipages de passage compris. Poste : technique.'],
+    ['Réservoir', 'f5a524', 500, '0', 5, '300 u de carburant de stock en plus.'],
+    ['Quai S', '4fd1c5', 600, '-1', 10, 'Petit quai : mineurs et contrebandiers seulement. Toujours au bout d’un étage.'],
+    ['Quai M', '35a89d', 1100, '-1', 15, 'Grand quai : tous les vaisseaux. Poste : commerce, le plein va deux fois plus vite.'],
+    ['Atelier', 'd9822b', 1200, '-3', 15, '2 postes de mécanicien : répare les vaisseaux à quai et les modules en panne.'],
+    ['Quartiers', '7a5c9e', 700, '-1', 5, '3 lits. Il faut un lit par personne pour embaucher et pour dormir.'],
+    ['Infirmerie', 'dfe7f2', 800, '-2', 10, 'Un poste de médecin : blessés et malades guérissent 4 fois plus vite.'],
+    ['Entrepôt', '8a7b62', 500, '0', 5, '40 pièces détachées de stock en plus.'],
+    ['Marché', '8fd16a', 1000, '-2', 10, 'Les vaisseaux y vendent leur cargaison, tu touches une commission. Poste : commerce.'],
+    ['Poste de sécurité', 'c0392b', 700, '-1', 10, '2 agents : chacun compte double contre les pirates et décourage les inspecteurs.'],
+    ['Réacteur', 'e5484d', 1800, '+14', 25, 'Licence. Gros producteur d’énergie ; sans technicien au poste, gare aux incidents.'],
+    ['Cantine', 'd9a441', 900, '-2', 10, 'Licence. Les équipages à quai y mangent : 30 ¢ par personne et par cycle.'],
+  ];
+  const AMELIORATIONS = [
+    ['Atelier', '+1 poste de mécanicien, travail +25 %'], ['Quai S et M', 'plein 30 % plus rapide, travail +25 %'],
+    ['Recycleur', '+4 places d’oxygène, travail +25 %'], ['Réservoir', '+150 u de carburant'], ['Quartiers', '+2 lits'],
+    ['Infirmerie', 'soins 25 % plus rapides'], ['Entrepôt', '+40 pièces'], ['Marché', 'commerce 25 % plus rapide'],
+    ['Poste de sécurité', '+1 poste d’agent, défense +25 %'], ['Réacteur', '+6 d’énergie'], ['Cantine', 'repas 25 % plus rentables'],
+  ];
+  const TRAITS = [
+    ['Habile', 'Travaille 30 % plus vite.', 'salaire +10 %', ''],
+    ['Lent', 'Travaille 25 % moins vite, mais coûte moins.', 'salaire -20 %', ''],
+    ['Économe', 'Se contente d’un salaire 25 % plus bas.', 'salaire -25 %', ''],
+    ['Exigeant', 'Bon travail (+15 %), mais réclame plus.', 'salaire +30 %', ''],
+    ['Polyvalent', 'Travaille à 80 % hors de sa compétence, au lieu de 50 %.', '', ''],
+    ['Infatigable', 'Se fatigue 40 % moins vite.', 'salaire +10 %', 'Licence'],
+    ['Insomniaque', 'Se fatigue deux fois moins, mais son moral s’use lentement.', '', 'Licence'],
+    ['Loyal', 'Vega ne peut pas le débaucher, et il garde le moral.', '', 'Licence'],
+    ['Ancien pirate', 'Compte double contre les pirates, mais les frégates s’en méfient.', '', 'Licence'],
+  ];
+  const RARETES = [
+    ['Commun', '8b94a7', '60 %', 'Un employé ordinaire.'],
+    ['Rare', '4f9be5', '27 %', 'Travaille 15 % mieux, se fatigue un peu moins. Salaire +20 %.'],
+    ['Épique', 'b06cf0', '10 %', 'Travaille 30 % mieux, se fatigue moins, et a toujours une deuxième compétence. Salaire +45 %.'],
+    ['Légendaire', 'f5c542', '3 %', 'Travaille 50 % mieux, se fatigue beaucoup moins, deux compétences, et son moral ne descend jamais sous 40. Salaire +80 %.'],
+  ];
+  const SUCCES = [
+    ['Propriétaire', 'Racheter la station une première fois.'], ['Ponctuel', 'Racheter la station sans manquer une échéance.'],
+    ['Personne ne reste derrière', 'Racheter la station sans perdre personne.'], ['Grand voyageur', 'Racheter la station dans les trois secteurs.'],
+    ['Contre vents et Compagnie', 'Racheter la station en Menace 5.'], ['Plaque tournante', 'Servir 100 vaisseaux en une partie.'],
+    ['Coffre plein', 'Avoir 10 000 ¢ en caisse.'], ['Pas sur mon quai', 'Repousser un abordage.'], ['Soldats du feu', 'Éteindre un incendie.'],
+    ['Perle rare', 'Avoir un employé légendaire dans l’équipe.'], ['Haut de gamme', 'Amener un module au niveau 3.'],
+    ['Toujours partant', 'Réussir 5 missions en une partie.'],
+  ];
+  const tableau = (entetes, lignes) => '<div class="tableau"><table><thead><tr>' + entetes.map(e => '<th>' + e + '</th>').join('') +
+    '</tr></thead><tbody>' + lignes.map(l => '<tr>' + l.map(c => '<td' + (typeof c === 'number' || /^[+\-]?\d/.test(String(c)) ? ' class="n"' : '') + '>' + c + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
+  const prix = n => n.toLocaleString('fr-FR').replace(/ /g, ' ') + ' ¢';
+  const perso = (id, nom, role, texte) => '<div class="perso"><img class="pixel" src="portraits/' + id + '.png" alt=""><div><b>' + nom + '</b><p class="role">' + role + '</p><p>' + texte + '</p></div></div>';
+
+  const ARTICLES = [
+    { groupe: 'Bien commencer' },
+    { id: 'demarrer', titre: 'Premiers pas', corps: `
+      <p>Une partie de Dockfall s'appelle une <b>concession</b>. Tu choisis un secteur, trois employés parmi six candidats, puis tu prends les commandes du Relais : une station en coupe, avec un ascenseur au centre et des quais au bout des étages.</p>
+      <h3>Les dix premières minutes</h3>
+      <ul>
+        <li>Laisse les premiers vaisseaux s'amarrer. L'accueil est automatique ; tu peux passer en mode radar pour accepter ou refuser chaque demande.</li>
+        <li>Ouvre <b>Tarifs</b> (T) : règle tes prix et achète du carburant au tanker et des pièces au fournisseur avant d'en manquer.</li>
+        <li>Ouvre <b>Personnel</b> (P) : vérifie que chacun est à un poste qui correspond à son métier.</li>
+        <li>Construis (C) des quartiers avant d'embaucher : il faut un lit par personne.</li>
+        <li>Surveille la case <b>ÉCHÉANCE</b> en haut à droite : le montant et les cycles restants avant le prélèvement.</li>
+      </ul>
+      <div class="encart">Un cycle dure 2 minutes à vitesse normale. Espace met en pause ; 1, 2 et 3 changent la vitesse. La touche H ouvre l'aide-mémoire à tout moment.</div>
+      <figure><img class="capture" src="images/preparation.png" alt="L'écran de préparation : choix du secteur, des licences et du niveau de Menace." loading="lazy"><figcaption>Préparation, étape 1 : le secteur, les licences à dépenser et le niveau de Menace.</figcaption></figure>` },
+    { id: 'echeances', titre: 'Score et rachat', corps: `
+      <p>Le but de Dockfall, c'est le <b>plus gros score</b>. Il s'affiche en jaune en haut de l'écran, en direct : c'est ce que tu gardes si la partie s'arrête maintenant. En fin de partie, il se convertit en licences (une pour 60 points) et le menu garde ton record.</p>
+      ${tableau(['Ce qui compte', 'Points'], [['Chaque cycle tenu', 10], ['Chaque tranche de 100 ¢ versée à la Compagnie', 1], ['Ta meilleure réputation', '1 par point'], ['Chaque survivant en fin de partie', 25], ['Le rachat de la station', 500], ['Chaque niveau de Menace', '+20 % sur le total']])}
+      <h3>Les échéances</h3>
+      <p>Toutes les <b>7 cycles</b>, la Compagnie prélève une échéance dans ta caisse. La première vaut 2 000 ¢, les suivantes augmentent nettement. La case en haut à droite affiche son numéro (par exemple <code>3/6</code>), son montant et les cycles restants.</p>
+      <h3>Racheter la station</h3>
+      <p>Paie la <b>sixième échéance</b> et le Relais n'appartient plus à la Compagnie : +500 au score, et le niveau de Menace suivant est débloqué. Tu choisis alors de <b>continuer en propriétaire</b> ou de <b>prendre ta retraite</b> tout de suite avec ce score.</p>
+      <h3>En propriétaire</h3>
+      <ul>
+        <li>Plus d'échéances : la Compagnie prélève une <b>taxe de secteur</b> tous les 7 cycles, la moitié de la dernière échéance au départ, puis 10 % de plus à chaque fois.</li>
+        <li>Tu achètes les <b>licences avec tes crédits</b> (bouton Licences, touche L) : elles servent tout de suite et restent acquises pour les parties suivantes.</li>
+        <li>Les crises continuent de s'intensifier. Chaque cycle tenu fait monter le score.</li>
+        <li>Tu pars quand tu veux : <b>Prendre ma retraite</b>, dans le menu pause, termine la partie et garde le score.</li>
+      </ul>
+      <h3>Perdre</h3>
+      <ul>
+        <li>Deux échéances (ou deux taxes) manquées : la Compagnie saisit la station (une seule suffit en Menace 5). Le score est gardé quand même.</li>
+        <li>Plus d'oxygène pendant trop longtemps : l'équipage meurt l'un après l'autre.</li>
+        <li>Plus personne à bord.</li>
+      </ul>
+      <h3>Objectifs de période</h3>
+      <p>Pour chaque période de 7 cycles, la Compagnie fixe un objectif : servir un nombre de vaisseaux, vendre du carburant, facturer des réparations, ne jamais passer à découvert, ne perdre personne… Réussi, il fait baisser l'échéance suivante de 15 %. Raté, il la fait monter de 10 %.</p>
+      <h3>Bonus après une échéance payée</h3>
+      <p>À chaque échéance payée, choisis un bonus parmi trois : subvention, caisse de 20 pièces, réservoirs pleins, réputation +8, échéance suivante -10 %, repos et moral pour tous, recrue sans prime, panneau solaire offert, révision complète des modules ou bonne presse auprès des capitaines.</p>
+      <figure><img class="capture" src="images/victoire.png" alt="L'écran de rachat : continuer en propriétaire ou prendre sa retraite." loading="lazy"><figcaption>La sixième échéance est payée : continuer en propriétaire, ou partir avec le score.</figcaption></figure>` },
+    { groupe: 'Faire tourner la station' },
+    { id: 'argent', titre: 'Argent et tarifs', corps: `
+      <p>Chaque vaisseau à quai paie un <b>droit d'amarrage</b>, puis les services qu'il demande : carburant (à l'unité), réparation (au point), cargaison vendue au marché (au lot) et soins (au point). Tu fixes chaque prix au crédit près dans le panneau <b>Tarifs</b>.</p>
+      <ul>
+        <li>Trop cher, le capitaine refuse le service, ou va directement chez Vega.</li>
+        <li>Le panneau affiche le prix de référence du secteur et celui de Vega : c'est ton repère.</li>
+        <li>À chaque fin de cycle, tu paies les salaires et l'entretien des modules.</li>
+        <li>La <b>réputation</b> (étoile en haut) attire plus de vaisseaux et rend les capitaines plus patients.</li>
+      </ul>
+      <div class="encart compagnie">Vega change de cible de temps en temps : Ines Calder casse ses prix sur le carburant ou sur la réparation. Garde un œil sur la radio.</div>` },
+    { id: 'stocks', titre: 'Carburant et pièces', corps: `
+      <p>Le <b>carburant</b> s'achète par lots au tanker, dont le prix change à chaque cycle. Le <b>réservoir</b> augmente ta capacité. Sans carburant, les vaisseaux venus faire le plein repartent mécontents.</p>
+      <p>Les <b>pièces détachées</b> s'achètent au fournisseur. L'atelier en consomme pour réparer les vaisseaux, et les mécaniciens libres s'en servent pour entretenir les modules usés. L'<b>entrepôt</b> augmente ton stock.</p>
+      <p>Chaque achat fait venir un vaisseau de livraison qui accoste quelques secondes à ton quai.</p>` },
+    { id: 'modules', titre: 'Modules', corps: `
+      <p>Ouvre <b>Construire</b> (C), choisis un module puis un emplacement en pointillés. La station peut monter de 3 étages et descendre de 4 ; les quais se posent toujours au bout d'un étage, côté espace.</p>
+      ${tableau(['Module', 'Prix', 'Énergie', 'Entretien', 'Rôle'], MODULES.map(m => ['<span class="pastille" style="background:#' + m[1] + '"></span>' + m[0], prix(m[2]), m[3], prix(m[4]), m[5]]))}
+      <h3>Améliorations</h3>
+      <p>Clique sur un module pour ouvrir sa fiche, puis sur <b>Améliorer</b>. Le niveau 2 coûte 60 % du prix du module, le niveau 3 en coûte 120 %. Un module amélioré consomme un peu plus d'énergie et d'entretien.</p>
+      ${tableau(['Module', 'Chaque niveau en plus'], AMELIORATIONS)}
+      <h3>Usure et pannes</h3>
+      <p>Un module qui travaille s'use. Sous 35 % d'intégrité, il risque la panne à chaque fin de cycle. Les mécaniciens sans travail l'entretiennent, une pièce pour 10 points d'intégrité.</p>` },
+    { id: 'energie', titre: 'Énergie et oxygène', corps: `
+      <p>Les panneaux solaires (+6) et le réacteur (+14) produisent l'énergie ; presque tous les autres modules en consomment. Le solde s'affiche en haut de l'écran.</p>
+      <p>En <b>déficit</b>, la station coupe des modules dans cet ordre : cantine, marché, atelier, quais, sécurité, quartiers, infirmerie, réservoir, et le recycleur en dernier. Tu peux changer l'ordre en réglant la <b>priorité</b> d'un module sur sa fiche (basse, normale, haute).</p>
+      <p>L'<b>oxygène</b> baisse quand il y a plus de personnes à bord que de places dans les recycleurs, équipages de passage compris. À 0 %, un membre de l'équipe meurt toutes les 60 secondes.</p>` },
+    { groupe: 'L’équipage' },
+    { id: 'personnel', titre: 'Personnel', corps: `
+      <p>Chaque employé a un <b>métier</b> (mécanique, technique, commerce, médecine ou sécurité), un <b>caractère</b> et une <b>rareté</b>. Il travaille à 100 % à un poste de son métier, à 50 % ailleurs.</p>
+      ${tableau(['Poste', 'Métier idéal'], [['Atelier', 'Mécanique'], ['Recycleur, réacteur', 'Technique'], ['Quais, marché, cantine', 'Commerce'], ['Infirmerie', 'Médecine'], ['Poste de sécurité', 'Sécurité']])}
+      <h3>Fatigue et moral</h3>
+      <p>Le travail fatigue : un employé épuisé part dormir aux quartiers s'il trouve un lit. Tu peux aussi l'<b>envoyer se reposer</b> depuis sa fiche. Un moral bas le ralentit, et un employé démoralisé peut démissionner ou accepter l'offre de Vega.</p>
+      <h3>Embaucher</h3>
+      <p>Une navette amène de nouveaux candidats à chaque cycle (onglet Recruter). Embaucher coûte une prime de deux cycles de salaire, et il faut un lit libre.</p>
+      <figure><img class="capture" src="images/personnel.png" alt="Le panneau Personnel : les postes, les employés et la fiche de Mei Hansen." loading="lazy"><figcaption>Le panneau Personnel : chaque poste, son métier idéal, et la fiche détaillée d'un employé.</figcaption></figure>` },
+    { id: 'traits', titre: 'Caractères et raretés', corps: `
+      <h3>Caractères</h3>
+      ${tableau(['Caractère', 'Effet', 'Salaire', 'Débloqué par'], TRAITS.map(t => [t[0], t[1], t[2] || '-', t[3] || 'Dès le départ']))}
+      <h3>Raretés</h3>
+      <p>La rareté se voit à la couleur du liseré sur la carte d'un candidat.</p>
+      ${tableau(['Rareté', 'Chance', 'Effet'], RARETES.map(r => ['<span class="rar" style="color:#' + r[1] + '">' + r[0] + '</span>', r[2], r[3]]))}
+      <h3>Espèces</h3>
+      <p>Les candidats peuvent être humains ou extraterrestres : Velkans, Ossarites et Thuuls. L'espèce ne change pas les règles, seulement l'allure.</p>` },
+    { groupe: 'Les dangers' },
+    { id: 'crises', titre: 'Crises', corps: `
+      <p>Des crises tombent régulièrement, de plus en plus souvent au fil de la partie. Certaines se jouent en direct sur la station, d'autres te demandent de choisir.</p>
+      <h3>Incendie</h3>
+      <p>Le feu prend dans un module et l'abîme. Clique dessus et choisis <b>Envoyer l'équipe éteindre</b> : les deux personnes les plus proches y courent. Sans réaction, le feu gagne le module voisin au bout de 20 secondes et blesse ceux qui y travaillent.</p>
+      <h3>Pirates et abordage</h3>
+      <p>Un chasseur pirate réclame une rançon. Si tu résistes, ils montent à bord : ils volent crédits et carburant à chaque seconde et peuvent blesser ton équipage. Tout le monde se bat, les agents de sécurité comptent beaucoup plus, et l'<b>alerte générale</b> (A) double la défense. Les repousser rapporte de la réputation ; au bout de 25 secondes, ils repartent avec leur butin.</p>
+      <h3>Inspection de la Compagnie</h3>
+      <p>Un inspecteur relève tes infractions et te met à l'amende : contrebande cachée à bord, traces du passage de contrebandiers, air vicié, station surpeuplée, personnel épuisé, salaires payés en retard, modules usés jusqu'à la corde. Le panneau Secteur (S) montre ce qu'il trouverait aujourd'hui.</p>
+      <h3>Et aussi</h3>
+      <ul>
+        <li><b>Tempête solaire</b> : les panneaux solaires ne produisent plus pendant un moment.</li>
+        <li><b>Fuite d'oxygène</b> : l'oxygène baisse vite tant qu'elle n'est pas colmatée.</li>
+        <li><b>Panne</b> et <b>sabotage</b> : un module s'arrête jusqu'à ce qu'un mécanicien le répare.</li>
+        <li><b>Épidémie</b> : un équipage malade à quai peut contaminer le tien.</li>
+        <li><b>Débauchage</b> : Ines Calder essaie de recruter un de tes employés.</li>
+      </ul>
+      <figure><img class="capture" src="images/incendie.png" alt="Un incendie dans l'atelier, la fiche du module ouverte." loading="lazy"><figcaption>L'atelier brûle : l'équipe est en route, la fiche du module montre le compte à rebours.</figcaption></figure>` },
+    { id: 'missions', titre: 'Missions', corps: `
+      <p>De temps en temps, un personnage te propose une petite mission. L'onglet <b>MISSIONS</b>, collé au bord gauche de l'écran, clignote quand une offre arrive. Clique dessus ou appuie sur M pour ouvrir le volet.</p>
+      ${tableau(['Qui', 'Mission'], [['Vasko Hale', 'Servir 3 vaisseaux d’ici la fin du cycle, ou encaisser 600 ¢ de services.'], ['Oskar Brenn', 'Vendre 120 u de carburant dans le cycle.'], ['Lyra Vance', 'Aucun client mécontent pendant le cycle.'], ['Cdte Ayo Korr', 'Livrer 10 pièces détachées tout de suite.'], ['Un capitaine à quai', 'Réparer son vaisseau en moins de 40 secondes.']])}
+      <p>Tu as 35 secondes pour accepter une offre. Une seule mission peut être en cours. Réussie, elle rapporte des crédits (et parfois de la réputation) ; ratée, elle coûte 1 point de réputation.</p>
+      <figure><img class="capture" src="images/missions.png" alt="Le volet des missions ouvert, avec une mission en cours et deux offres." loading="lazy"><figcaption>Le volet des missions : une mission en cours (en vert) et deux offres.</figcaption></figure>` },
+    { groupe: 'Le monde' },
+    { id: 'personnages', titre: 'Personnages', corps: `
+      <p>Ils passent à la radio, proposent des affaires et se souviennent de ce que tu as fait.</p>
+      <div class="pile">
+        ${perso('vasko_hale', 'Vasko Hale', 'Directeur, la Compagnie', 'Ton créancier, toujours poli. Il propose des prêts à rembourser avec l’échéance, des conteneurs à ne pas ouvrir et des « contributions volontaires ». Refuse trop souvent et la Compagnie se venge : échéance relevée, livraisons bloquées, inspecteurs envoyés.')}
+        ${perso('ines_calder', 'Ines Calder', 'Gérante du Comptoir Vega', 'Ta concurrente directe. Elle casse ses prix, essaie de débaucher ton personnel, mais propose aussi une alliance contre les pirates ou de racheter ton carburant en trop.')}
+        ${perso('mara_ilves', 'Mara Ilves', 'Mécanicienne', 'Souvent dans ton équipe de départ. Elle signale les pannes à la radio et a parfois une idée pour améliorer le recycleur.')}
+        ${perso('oskar_brenn', 'Oskar Brenn', 'Capitaine du mineur Tarn-4', 'Un habitué. Il organise des concours entre mineurs et propose des missions de carburant pour la flotte de la mine.')}
+        ${perso('lyra_vance', 'Lyra Vance', 'Capitaine du paquebot Aurélie', 'Ses passagers s’ennuient : elle propose des visites de la station et une belle publicité si personne ne repart mécontent.')}
+        ${perso('sef_fantome', 'Sef « Fantôme »', 'Contrebandier du Nox', 'Il paie bien pour qu’une caisse disparaisse quelques cycles. L’inspecteur, lui, la trouvera peut-être.')}
+        ${perso('ayo_korr', 'Cdte Ayo Korr', 'Frégate ASN Korr', 'La marine. Elle commande des pièces en urgence et se méfie des anciens pirates.')}
+      </div>
+      <h3>Capitaines réguliers</h3>
+      <p>Une dizaine de capitaines reviennent d'une partie à l'autre. Chacun garde une <b>relation</b> avec ta station : bien servis, ils reviennent plus souvent et peuvent te proposer un contrat (un vaisseau sur quatre sera le leur en échange d'une remise).</p>` },
+    { id: 'secteurs', titre: 'Secteurs', corps: `
+      ${tableau(['Secteur', 'Clientèle', 'Prix', 'Pirates', 'Débloqué par'], [['Ceinture de Tarn', 'Mineurs et cargos, quelques paquebots.', '×1', 'rares', 'Dès le départ'], ['Marges du Nox', 'Contrebande et pirates.', '×1,15', 'fréquents', '5 licences'], ['Anneau de Pell', 'Paquebots de luxe et cargos riches. Vega y est féroce et l’oxygène part vite.', '×1,25', 'peu', '6 licences']])}` },
+    { id: 'licences', titre: 'Licences', corps: `
+      <p>À la fin de chaque partie, ton score se convertit en <b>licences</b> (une pour 60 points). Tu les dépenses à l'écran de préparation, et elles restent acquises pour toutes les parties suivantes. Une fois la station rachetée, tu peux aussi les acheter en jeu avec tes crédits : 1 500 ¢ par licence de coût (un réacteur, à 4 licences, coûte 6 000 ¢).</p>
+      ${tableau(['Licence', 'Coût', 'Effet'], [['Module : réacteur', 4, '+14 d’énergie, mais des incidents sans technicien.'], ['Module : cantine', 3, 'Fait payer les repas aux équipages de passage.'], ['Trait : infatigable', 2, 'Des candidats qui se fatiguent moins.'], ['Trait : loyal', 2, 'Des candidats que Vega ne peut pas débaucher.'], ['Trait : ancien pirate', 3, 'Des candidats redoutables contre les pirates.'], ['Trait : insomniaque', 2, 'Des candidats qui dorment peu, au prix de leur moral.'], ['Secteur : Marges du Nox', 5, 'Contrebande, pirates et clients plus riches.'], ['Secteur : Anneau de Pell', 6, 'Paquebots de luxe, clients généreux, Vega féroce.']])}` },
+    { id: 'menace', titre: 'Menace', corps: `
+      <p>Racheter la station débloque le niveau de <b>Menace</b> suivant, jusqu'à 5. Tu le choisis sous les secteurs, à l'écran de préparation. Chaque niveau garde les effets des précédents et multiplie le score (+20 % par niveau).</p>
+      ${tableau(['Niveau', 'Ce qui change'], [[0, 'Les conditions habituelles de la Compagnie.'], [1, 'Échéances 15 % plus lourdes.'], [2, 'Crises 25 % plus fréquentes.'], [3, 'Départ avec 2 200 ¢ au lieu de 3 000 ¢.'], [4, 'Vasko plus rancunier, tanker 20 % plus cher.'], [5, 'Une seule échéance manquée et la station est saisie.']])}` },
+    { id: 'succes', titre: 'Succès', corps: `
+      <p>Douze succès, à consulter depuis le menu principal. Ils sont gardés d'une partie à l'autre.</p>
+      ${tableau(['Succès', 'Condition'], SUCCES)}` },
+    { groupe: 'Pratique' },
+    { id: 'touches', titre: 'Touches', corps: `
+      <p>Les raccourcis se changent dans <b>Options › Touches du clavier</b>, au menu principal. Voici les touches par défaut.</p>
+      ${tableau(['Touche', 'Action'], [['<kbd>C</kbd>', 'Construire'], ['<kbd>P</kbd>', 'Personnel'], ['<kbd>T</kbd>', 'Tarifs, tanker et fournisseur'], ['<kbd>S</kbd>', 'Secteur : Vega, capitaines, inspection'], ['<kbd>M</kbd>', 'Volet des missions'], ['<kbd>L</kbd>', 'Licences (une fois propriétaire)'], ['<kbd>A</kbd>', 'Alerte générale'], ['<kbd>Espace</kbd>', 'Pause'], ['<kbd>H</kbd>', 'Aide-mémoire'], ['<kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>', 'Vitesse normale, ×2, ×3 (fixes)'], ['<kbd>Échap</kbd>', 'Fermer un panneau, menu pause (fixe)'], ['Molette', 'Zoom'], ['Flèches, clic molette', 'Déplacer la vue'], ['<kbd>F11</kbd>', 'Plein écran (fixe)']])}` },
+  ];
+  const PAGES = ARTICLES.filter(a => a.id);
+
+  // ---------------------------------------------------------------- wiki
+  const sommaire = document.getElementById('sommaire');
+  sommaire.innerHTML = ARTICLES.map(a => a.groupe ? '<p class="groupe">' + a.groupe + '</p>' : '<a href="#wiki-' + a.id + '" data-article="' + a.id + '">' + a.titre + '</a>').join('');
+  function afficherArticle(id) {
+    const i = Math.max(0, PAGES.findIndex(p => p.id === id));
+    const a = PAGES[i];
+    const avant = PAGES[i - 1], apres = PAGES[i + 1];
+    document.getElementById('article').innerHTML = '<p class="surtitre">Wiki</p><h2>' + a.titre + '</h2>' + a.corps +
+      '<div class="suite">' + (avant ? '<a href="#wiki-' + avant.id + '">‹ ' + avant.titre + '</a>' : '<span></span>') +
+      (apres ? '<a href="#wiki-' + apres.id + '">' + apres.titre + ' ›</a>' : '') + '</div>';
+    sommaire.querySelectorAll('a').forEach(l => l.setAttribute('aria-current', l.dataset.article === a.id ? 'true' : 'false'));
+  }
+
+  // ---------------------------------------------------------------- captures
+  const CAPTURES = [
+    ['station.png', 'Cycle 9 : deux paquebots à quai, la deuxième échéance approche.'],
+    ['incendie.png', 'Incendie dans l’atelier : l’équipe court l’éteindre.'],
+    ['abordage.png', 'Abordage : trois pirates à bord, 126 ¢ déjà volés.'],
+    ['missions.png', 'Le volet des missions, avec une mission en cours.'],
+    ['personnel.png', 'Le panneau Personnel et la fiche d’un employé.'],
+    ['construire.png', 'Construire : la station a grandi, Mara signale une panne à la radio.'],
+    ['preparation.png', 'Préparation : secteur, licences et niveau de Menace.'],
+    ['victoire.png', 'La station est rachetée : continuer en propriétaire ou prendre sa retraite.'],
+    ['menu.png', 'Le menu principal.'],
+  ];
+  const galerie = document.getElementById('galerie');
+  galerie.innerHTML = CAPTURES.map((c, i) => '<figure><button type="button" data-i="' + i + '" aria-label="Agrandir : ' + c[1] + '"><img class="capture" src="images/' + c[0] + '" alt="' + c[1] + '" loading="lazy" width="1440" height="810"></button><figcaption>' + c[1] + '</figcaption></figure>').join('');
+  const visionneuse = document.getElementById('visionneuse');
+  galerie.addEventListener('click', e => {
+    const b = e.target.closest('button[data-i]');
+    if (!b) return;
+    const c = CAPTURES[+b.dataset.i];
+    document.getElementById('visionneuse-img').src = 'images/' + c[0];
+    document.getElementById('visionneuse-img').alt = c[1];
+    document.getElementById('visionneuse-txt').textContent = c[1];
+    if (visionneuse.showModal) visionneuse.showModal();
+  });
+  visionneuse.addEventListener('click', e => { if (e.target === visionneuse) visionneuse.close(); });
+
+  // ---------------------------------------------------------------- navigation par onglets (#accueil, #wiki-modules…)
+  const VUES = ['accueil', 'telecharger', 'wiki', 'captures', 'nouveautes'];
+  function router() {
+    const h = (location.hash || '#accueil').slice(1);
+    let vue = h.startsWith('wiki') ? 'wiki' : h;
+    if (!VUES.includes(vue)) vue = 'accueil';
+    document.querySelectorAll('[data-vue]').forEach(s => { s.hidden = s.dataset.vue !== vue; });
+    document.querySelectorAll('[data-onglet]').forEach(a => {
+      if (a.dataset.onglet === vue) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
+    if (vue === 'wiki') afficherArticle(h.startsWith('wiki-') ? h.slice(5) : 'demarrer');
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', router);
+  router();
+
+  // ---------------------------------------------------------------- téléchargement : le fichier est-il en ligne ?
+  const bouton = document.getElementById('dl-bouton');
+  fetch(bouton.getAttribute('href'), { method: 'HEAD' }).then(r => {
+    if (!r.ok) throw new Error('absent');
+    const octets = +r.headers.get('content-length');
+    if (octets > 0) document.getElementById('dl-taille').textContent = Math.round(octets / 1048576) + ' Mo';
+  }).catch(() => {
+    bouton.setAttribute('aria-disabled', 'true');
+    bouton.removeAttribute('href');
+    const note = document.getElementById('dl-note');
+    note.hidden = false;
+    note.className = 'note alerte';
+    note.textContent = 'Le fichier n’est pas encore en ligne sur cette version du site. Il sera disponible ici dès sa mise en ligne.';
+  });
+
+  // ---------------------------------------------------------------- l'échéance de l'accueil s'égrène
+  const compte = document.getElementById('compte');
+  let reste = 7.0;
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    setInterval(() => { reste = reste <= 0.1 ? 7.0 : reste - 0.1; compte.textContent = reste.toFixed(1).replace('.', ','); }, 1700);
+  }
+})();
+</script>
+</body>
+</html>
