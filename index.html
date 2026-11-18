@@ -269,7 +269,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   <div class="dl">
     <div class="carte cyan">
       <dl class="fiche">
-        <dt>Version</dt><dd>Prototype 0.11</dd>
+        <dt>Version</dt><dd>Prototype 0.12</dd>
         <dt>Système</dt><dd>Windows 10 ou 11, 64 bits</dd>
         <dt>Fichier</dt><dd><span id="dl-nom">Dockfall-windows.zip</span> • <span id="dl-taille">environ 50 Mo</span></dd>
         <dt>Langue</dt><dd>Français, anglais</dd>
@@ -331,6 +331,17 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <tbody id="classement-lignes"></tbody>
     </table>
   </div>
+  <div class="bande" style="margin-top: 40px">
+    <h3>Concession du jour • <span id="jour-date"></span></h3>
+    <p class="lecture calme">Même départ pour tout le monde aujourd’hui (menu « Concession du jour » dans le jeu). Seule la première partie de chaque joueur compte.</p>
+    <p class="note" id="jour-etat">Chargement…</p>
+    <div class="tableau" id="jour-tableau" hidden>
+      <table>
+        <thead><tr><th>Rang</th><th>Pseudo</th><th>Cycles</th><th>Score</th><th>Secteur</th><th>Menace</th></tr></thead>
+        <tbody id="jour-lignes"></tbody>
+      </table>
+    </div>
+  </div>
 </section>
 
 <!-- ============================== CAPTURES ============================== -->
@@ -355,8 +366,10 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   </div>
   <div class="journal">
     <div class="version">
-      <div><p class="num">0.11</p><p class="date">Novembre 2026</p></div>
+      <div><p class="num">0.11 – 0.12</p><p class="date">Novembre 2026</p></div>
       <ul>
+        <li><b>Concession du jour</b> : même départ pour tout le monde, avec son propre classement.</li>
+        <li><b>Histoires d’équipage</b> : surnoms gagnés par les exploits, amitiés, mémorial, et un journal de bord de chaque partie.</li>
         <li><b>Donner mon avis</b> : depuis le menu pause ou l'écran de fin, écris directement à l'équipe.</li>
         <li><b>Statistiques anonymes</b> de fin de partie, pour équilibrer le jeu (désactivables dans Options).</li>
       </ul>
@@ -453,7 +466,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
 <footer>
   <div class="wrap">
-    <span>Dockfall • prototype 0.11 • fait avec Godot 4</span>
+    <span>Dockfall • prototype 0.12 • fait avec Godot 4</span>
     <span>Police du site : VT323 et IBM Plex (licence OFL)</span>
   </div>
 </footer>
@@ -758,16 +771,22 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   // ---------------------------------------------------------------- classement mondial (servi par /api/scores)
   const SECTEURS_NOMS = { tarn: 'Tarn', nox: 'Nox', pell: 'Pell' };
   function echapper(t) { return String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]); }
-  function chargerClassement() {
-    const etat = document.getElementById('classement-etat');
-    const bloc = document.getElementById('classement-tableau');
-    fetch('/api/scores', { cache: 'no-store' }).then(r => { if (!r.ok) throw new Error(); return r.json(); }).then(d => {
+  function remplir(url, etatId, blocId, lignesId) {
+    const etat = document.getElementById(etatId);
+    const bloc = document.getElementById(blocId);
+    fetch(url, { cache: 'no-store' }).then(r => { if (!r.ok) throw new Error(); return r.json(); }).then(d => {
       const top = d.top || [];
       if (!top.length) { etat.textContent = 'Personne n\u2019est encore classé. Termine une partie pour ouvrir le bal.'; bloc.hidden = true; return; }
-      document.getElementById('classement-lignes').innerHTML = top.map(p => '<tr><td class="n">' + p.rang + '</td><td>' + echapper(p.pseudo) + (p.proprietaire ? ' <span class="calme">• propriétaire</span>' : '') + '</td><td class="n">' + p.cycles + '</td><td class="n">' + p.score.toLocaleString('fr-FR') + '</td><td>' + (SECTEURS_NOMS[p.secteur] || p.secteur) + '</td><td class="n">' + (p.menace || 0) + '</td></tr>').join('');
+      document.getElementById(lignesId).innerHTML = top.map(p => '<tr><td class="n">' + p.rang + '</td><td>' + echapper(p.pseudo) + (p.proprietaire ? ' <span class="calme">• propriétaire</span>' : '') + '</td><td class="n">' + p.cycles + '</td><td class="n">' + p.score.toLocaleString('fr-FR') + '</td><td>' + (SECTEURS_NOMS[p.secteur] || p.secteur) + '</td><td class="n">' + (p.menace || 0) + '</td></tr>').join('');
       etat.textContent = d.total + (d.total > 1 ? ' joueurs classés.' : ' joueur classé.');
       bloc.hidden = false;
     }).catch(() => { etat.textContent = 'Classement indisponible pour le moment.'; etat.className = 'note alerte'; bloc.hidden = true; });
+  }
+  function chargerClassement() {
+    const jour = new Date().toISOString().slice(0, 10);
+    document.getElementById('jour-date').textContent = jour;
+    remplir('/api/scores', 'classement-etat', 'classement-tableau', 'classement-lignes');
+    remplir('/api/scores?jour=' + jour, 'jour-etat', 'jour-tableau', 'jour-lignes');
   }
 
   // ---------------------------------------------------------------- navigation par onglets (#accueil, #wiki-modules…)

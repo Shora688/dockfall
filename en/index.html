@@ -269,7 +269,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   <div class="dl">
     <div class="carte cyan">
       <dl class="fiche">
-        <dt>Version</dt><dd>Prototype 0.11</dd>
+        <dt>Version</dt><dd>Prototype 0.12</dd>
         <dt>System</dt><dd>Windows 10 or 11, 64-bit</dd>
         <dt>File</dt><dd><span id="dl-nom">Dockfall-windows.zip</span> • <span id="dl-taille">about 50 MB</span></dd>
         <dt>Languages</dt><dd>English, French</dd>
@@ -331,6 +331,17 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <tbody id="classement-lignes"></tbody>
     </table>
   </div>
+  <div class="bande" style="margin-top: 40px">
+    <h3>Daily concession • <span id="jour-date"></span></h3>
+    <p class="lecture calme">The same start for everyone today (“Daily concession” in the game menu). Only each player’s first run counts.</p>
+    <p class="note" id="jour-etat">Loading…</p>
+    <div class="tableau" id="jour-tableau" hidden>
+      <table>
+        <thead><tr><th>Rank</th><th>Nickname</th><th>Cycles</th><th>Score</th><th>Sector</th><th>Threat</th></tr></thead>
+        <tbody id="jour-lignes"></tbody>
+      </table>
+    </div>
+  </div>
 </section>
 
 <!-- ============================== SCREENSHOTS ============================== -->
@@ -355,8 +366,10 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   </div>
   <div class="journal">
     <div class="version">
-      <div><p class="num">0.11</p><p class="date">November 2026</p></div>
+      <div><p class="num">0.11 – 0.12</p><p class="date">November 2026</p></div>
       <ul>
+        <li><b>Daily concession</b>: the same start for everyone, with its own leaderboard.</li>
+        <li><b>Crew stories</b>: nicknames earned through feats, friendships, a memorial, and a logbook for every run.</li>
         <li><b>Give feedback</b>: from the pause menu or the end screen, write directly to the team.</li>
         <li><b>Anonymous end-of-run statistics</b> to balance the game (can be turned off in Options).</li>
       </ul>
@@ -436,7 +449,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
 <footer>
   <div class="wrap">
-    <span>Dockfall • prototype 0.11 • made with Godot 4</span>
+    <span>Dockfall • prototype 0.12 • made with Godot 4</span>
     <span>Site fonts: VT323 and IBM Plex (OFL license)</span>
   </div>
 </footer>
@@ -736,16 +749,22 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   // ---------------------------------------------------------------- world leaderboard (served by /api/scores)
   const SECTEURS_NOMS = { tarn: 'Tarn', nox: 'Nox', pell: 'Pell' };
   function echapper(t) { return String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]); }
-  function chargerClassement() {
-    const etat = document.getElementById('classement-etat');
-    const bloc = document.getElementById('classement-tableau');
-    fetch('/api/scores', { cache: 'no-store' }).then(r => { if (!r.ok) throw new Error(); return r.json(); }).then(d => {
+  function remplir(url, etatId, blocId, lignesId) {
+    const etat = document.getElementById(etatId);
+    const bloc = document.getElementById(blocId);
+    fetch(url, { cache: 'no-store' }).then(r => { if (!r.ok) throw new Error(); return r.json(); }).then(d => {
       const top = d.top || [];
       if (!top.length) { etat.textContent = 'Nobody is ranked yet. Finish a run to get things started.'; bloc.hidden = true; return; }
-      document.getElementById('classement-lignes').innerHTML = top.map(p => '<tr><td class="n">' + p.rang + '</td><td>' + echapper(p.pseudo) + (p.proprietaire ? ' <span class="calme">• owner</span>' : '') + '</td><td class="n">' + p.cycles + '</td><td class="n">' + p.score.toLocaleString('en-US') + '</td><td>' + (SECTEURS_NOMS[p.secteur] || p.secteur) + '</td><td class="n">' + (p.menace || 0) + '</td></tr>').join('');
+      document.getElementById(lignesId).innerHTML = top.map(p => '<tr><td class="n">' + p.rang + '</td><td>' + echapper(p.pseudo) + (p.proprietaire ? ' <span class="calme">• owner</span>' : '') + '</td><td class="n">' + p.cycles + '</td><td class="n">' + p.score.toLocaleString('en-US') + '</td><td>' + (SECTEURS_NOMS[p.secteur] || p.secteur) + '</td><td class="n">' + (p.menace || 0) + '</td></tr>').join('');
       etat.textContent = d.total + (d.total > 1 ? ' players ranked.' : ' player ranked.');
       bloc.hidden = false;
     }).catch(() => { etat.textContent = 'Leaderboard unavailable for now.'; etat.className = 'note alerte'; bloc.hidden = true; });
+  }
+  function chargerClassement() {
+    const jour = new Date().toISOString().slice(0, 10);
+    document.getElementById('jour-date').textContent = jour;
+    remplir('/api/scores', 'classement-etat', 'classement-tableau', 'classement-lignes');
+    remplir('/api/scores?jour=' + jour, 'jour-etat', 'jour-tableau', 'jour-lignes');
   }
 
   // ---------------------------------------------------------------- tab navigation (#accueil, #wiki-modules…)

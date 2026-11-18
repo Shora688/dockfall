@@ -47,8 +47,21 @@ export default async (req) => {
   const store = getStore({ name: "classement", consistency: "strong" });
   const parties = (await store.get(CLE, { type: "json" })) || {};
 
+  const jourValide = (j) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(j || ""))) return false;
+    const ecart = Date.now() - Date.parse(j + "T00:00:00Z");
+    return ecart > -86400000 && ecart < 2 * 86400000;   // la veille, le jour même ou le lendemain (fuseaux)
+  };
+
   if (req.method === "GET") {
-    const id = new URL(req.url).searchParams.get("id") || "";
+    const params = new URL(req.url).searchParams;
+    const id = params.get("id") || "";
+    const jour = params.get("jour") || "";
+    if (jour) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(jour)) return repondre({ erreur: "Date invalide." }, 400);
+      const duJour = (await store.get("jour-" + jour, { type: "json" })) || {};
+      return repondre({ ...classement(duJour, id), jour });
+    }
     return repondre(classement(parties, id));
   }
   if (req.method !== "POST") return repondre({ erreur: "Méthode non prise en charge." }, 405);
@@ -89,7 +102,19 @@ export default async (req) => {
     ancienne.pseudo = pseudo;   // le pseudo suit le dernier choisi
   }
   await store.setJSON(CLE, parties);
-  return repondre({ ...classement(parties, id), record });
+  const corps = { ...classement(parties, id), record };
+  // concession du jour : la première partie de chaque joueur compte
+  if (d.jour && jourValide(d.jour)) {
+    const cleJour = "jour-" + d.jour;
+    const duJour = (await store.get(cleJour, { type: "json" })) || {};
+    if (!duJour[id]) {
+      duJour[id] = { ...partie };
+      await store.setJSON(cleJour, duJour);
+    }
+    const cj = classement(duJour, id);
+    corps.quotidien = { rang: cj.joueur ? cj.joueur.rang : 0, total: cj.total };
+  }
+  return repondre(corps);
 };
 
 export const config = { path: "/api/scores" };
