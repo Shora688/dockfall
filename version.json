@@ -1,5 +1,7 @@
 {
   "version": "0.4",
   "date": "2026-11-18",
-  "url": "https://dockfall.netlify.app/#telecharger"
+  "url": "https://dockfall.netlify.app/#telecharger",
+  "zip": "https://dockfall.netlify.app/telechargement/Dockfall-windows.zip",
+  "sha256": "56e29473fa5874610bbd97e51462ff696e3c0860d20395495dd982b282b7725e"
 }
