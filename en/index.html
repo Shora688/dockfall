@@ -30,7 +30,7 @@
 <meta name="twitter:title" content="Dockfall • Free roguelite space station management game (Windows)">
 <meta name="twitter:description" content="Dockfall is a free pixel-art roguelite management game for Windows: run a refueling space station deep in debt, refuel and repair ships, hire your crew, fight off pirates and buy the station. World leaderboard, wiki, in English and French.">
 <meta name="twitter:image" content="https://dockfall.netlify.app/images/en/station.png">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"Dockfall","url":"https://dockfall.netlify.app/en/","description":"Dockfall is a free pixel-art roguelite management game for Windows: run a refueling space station deep in debt, refuel and repair ships, hire your crew, fight off pirates and buy the station. World leaderboard, wiki, in English and French.","image":"https://dockfall.netlify.app/images/en/station.png","screenshot":["https://dockfall.netlify.app/images/station.png","https://dockfall.netlify.app/images/incendie.png","https://dockfall.netlify.app/images/abordage.png","https://dockfall.netlify.app/images/voisinage.png"],"genre":["Management","Simulation","Roguelite","Strategy"],"gamePlatform":["PC","Windows"],"operatingSystem":"Windows 10, Windows 11","applicationCategory":"GameApplication","playMode":"SinglePlayer","inLanguage":["fr","en"],"softwareVersion":"0.14","downloadUrl":"https://dockfall.netlify.app/telechargement/Dockfall-windows.zip","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR","availability":"https://schema.org/InStock","url":"https://dockfall.netlify.app/en/#telecharger"},"publisher":{"@type":"Organization","name":"Dockfall","url":"https://dockfall.netlify.app/"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"Dockfall","url":"https://dockfall.netlify.app/en/","description":"Dockfall is a free pixel-art roguelite management game for Windows: run a refueling space station deep in debt, refuel and repair ships, hire your crew, fight off pirates and buy the station. World leaderboard, wiki, in English and French.","image":"https://dockfall.netlify.app/images/en/station.png","screenshot":["https://dockfall.netlify.app/images/station.png","https://dockfall.netlify.app/images/incendie.png","https://dockfall.netlify.app/images/abordage.png","https://dockfall.netlify.app/images/voisinage.png"],"genre":["Management","Simulation","Roguelite","Strategy"],"gamePlatform":["PC","Windows"],"operatingSystem":"Windows 10, Windows 11","applicationCategory":"GameApplication","playMode":"SinglePlayer","inLanguage":["fr","en"],"softwareVersion":"0.15","downloadUrl":"https://dockfall.netlify.app/telechargement/Dockfall-windows.zip","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR","availability":"https://schema.org/InStock","url":"https://dockfall.netlify.app/en/#telecharger"},"publisher":{"@type":"Organization","name":"Dockfall","url":"https://dockfall.netlify.app/"}}</script>
 <link rel="icon" href="../images/icone.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -280,6 +280,47 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     </div>
     <div class="rangee"><a class="bouton" href="#wiki-personnages">All the characters</a></div>
   </div>
+
+  <div class="bande">
+    <h2>In motion</h2>
+    <figure>
+      <img class="capture pixel" src="../images/dockfall_partie.gif" alt="Animation: a pirate ship fires at the station, fire spreads through the dock and the workshop, the crew runs everywhere." loading="lazy" width="720" height="405">
+      <figcaption>A fire in the dock and the workshop while three pirates board the station. It happens.</figcaption>
+    </figure>
+  </div>
+
+  <div class="bande" id="partager">
+    <h2>Spread the word</h2>
+    <p class="lecture calme">The game is free and made by a tiny team: every share really counts.</p>
+    <div class="rangee">
+      <a class="bouton" href="https://www.reddit.com/submit?url=https%3A%2F%2Fdockfall.netlify.app%2Fen%2F&title=Dockfall%3A%20a%20free%20pixel-art%20roguelite%20space%20station%20management%20game" target="_blank" rel="noopener">Reddit</a>
+      <a class="bouton" href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fdockfall.netlify.app%2Fen%2F&text=Dockfall%3A%20a%20free%20pixel-art%20roguelite%20space%20station%20management%20game" target="_blank" rel="noopener">X</a>
+      <a class="bouton" href="https://bsky.app/intent/compose?text=Dockfall%3A%20a%20free%20pixel-art%20roguelite%20space%20station%20management%20game%20https%3A%2F%2Fdockfall.netlify.app%2Fen%2F" target="_blank" rel="noopener">Bluesky</a>
+      <a class="bouton" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdockfall.netlify.app%2Fen%2F" target="_blank" rel="noopener">Facebook</a>
+      <a class="bouton" href="https://wa.me/?text=Dockfall%3A%20a%20free%20pixel-art%20roguelite%20space%20station%20management%20game%20https%3A%2F%2Fdockfall.netlify.app%2Fen%2F" target="_blank" rel="noopener">WhatsApp</a>
+      <button class="bouton" type="button" id="copier-lien" data-ok="Link copied!">Copy link</button>
+    </div>
+  </div>
+
+  <div class="bande" id="presse">
+    <details class="carte">
+      <summary><b>Press kit</b> • for journalists, video creators and streamers</summary>
+      <dl class="fiche" style="margin-top: 16px">
+        <dt>Title</dt><dd>Dockfall</dd>
+        <dt>Genre</dt><dd>Space station management, roguelite</dd>
+        <dt>Platform</dt><dd>Windows 10 and 11</dd>
+        <dt>Price</dt><dd>Free</dd>
+        <dt>Languages</dt><dd>English, French</dd>
+        <dt>Engine</dt><dd>Godot 4</dd>
+        <dt>Version</dt><dd>Prototype <span class="version-site">0.15</span></dd>
+        <dt>Website</dt><dd><a href="https://dockfall.netlify.app/en/">dockfall.netlify.app</a></dd>
+      </dl>
+      <p class="lecture">Dockfall is a pixel-art roguelite management game: you take over a refueling space station deep in debt and must pay the Company, deadline after deadline.</p>
+      <p class="lecture calme">Refuel and repair ships at the prices you set, build and upgrade the station's modules, hire a crew of four species and keep them alive through fires, pirates and inspectors. After six deadlines the station is yours: carry on as owner and aim for the highest score on the world leaderboard. Every run is different: three sectors, three starting stations, conditions, challenges, a daily concession and a mystery to uncover, the former manager's journal.</p>
+      <p class="lecture">Images and animation, free to use to talk about the game: <a href="../images/dockfall_partie.gif" download>GIF</a> • <a href="../images/en/station.png" download>station.png</a> • <a href="../images/en/incendie.png" download>incendie.png</a> • <a href="../images/en/abordage.png" download>abordage.png</a> • <a href="../images/en/voisinage.png" download>voisinage.png</a> • <a href="../images/en/equipe.png" download>equipe.png</a> • <a href="../images/en/victoire.png" download>victoire.png</a> • <a href="../images/station_art.png" download>station_art.png</a> • <a href="../images/icone.png" download>icone.png</a></p>
+      <p class="note">You may show, record and monetize videos of Dockfall without asking.</p>
+    </details>
+  </div>
 </section>
 
 <!-- ============================== DOWNLOAD ============================== -->
@@ -292,7 +333,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   <div class="dl">
     <div class="carte cyan">
       <dl class="fiche">
-        <dt>Version</dt><dd>Prototype 0.14</dd>
+        <dt>Version</dt><dd>Prototype 0.15</dd>
         <dt>System</dt><dd>Windows 10 or 11, 64-bit</dd>
         <dt>File</dt><dd><span id="dl-nom">Dockfall-windows.zip</span> • <span id="dl-taille">about 50 MB</span></dd>
         <dt>Languages</dt><dd>English, French</dd>
@@ -389,9 +430,10 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   </div>
   <div class="journal">
     <div class="version">
-      <div><p class="num">0.11 – 0.14</p><p class="date">November 2026</p></div>
+      <div><p class="num">0.11 – 0.15</p><p class="date">November 2026</p></div>
       <ul>
         <li><b>Daily concession</b>: the same start for everyone, with its own leaderboard.</li>
+        <li><b>Sharing</b>: a button at the end of a run copies your score and the game link; press kit and share buttons on the website.</li>
         <li><b>Run summaries</b>: along with the anonymous stats, a short summary of every run (even abandoned ones) to spot what gets players stuck and what the game is missing.</li>
         <li><b>The Relay mystery</b>: eight fragments of Elias Varn’s journal, the former manager, to discover by playing and reread in the Archives menu.</li>
         <li><b>Crew reactions</b>: small icons above heads (alert, nickname, friendship, mourning).</li>
@@ -475,7 +517,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
 <footer>
   <div class="wrap">
-    <span>Dockfall • prototype 0.14 • made with Godot 4</span>
+    <span>Dockfall • prototype 0.15 • made with Godot 4 • <a href="#presse">Press kit</a> • <a href="#partager">Share</a></span>
     <span>Site fonts: VT323 and IBM Plex (OFL license)</span>
   </div>
 </footer>
@@ -483,6 +525,13 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 <script>
 (function () {
   // remember the language chosen with the FR | EN switch
+
+  // bouton « copier le lien » du bloc de partage
+  const copier = document.getElementById('copier-lien');
+  if (copier) copier.addEventListener('click', () => {
+    const fait = () => { copier.textContent = copier.dataset.ok; };
+    if (navigator.clipboard) navigator.clipboard.writeText(location.origin + location.pathname).then(fait, fait); else fait();
+  });
   document.querySelectorAll('a.langue').forEach(a => a.addEventListener('click', () => {
     try { localStorage.setItem('dockfall-langue', a.dataset.langue); } catch (e) {}
     a.href = a.getAttribute('href').split('#')[0] + location.hash;
@@ -805,7 +854,9 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     });
     if (vue === 'wiki') afficherArticle(h.startsWith('wiki-') ? h.slice(5) : 'demarrer');
     if (vue === 'classement') chargerClassement();
-    window.scrollTo(0, 0);
+    // #presse, #partager : un bloc de l'accueil, on y descend (et le kit presse s'ouvre)
+    const cible = vue === 'accueil' && h !== 'accueil' ? document.getElementById(h) : null;
+    if (cible) { const d = cible.querySelector('details'); if (d) d.open = true; cible.scrollIntoView(); } else window.scrollTo(0, 0);
   }
   window.addEventListener('hashchange', router);
   router();
