@@ -340,6 +340,8 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
         <li><b>Le but, c'est le score.</b> Il s'affiche en direct en haut de l'écran, et l'écran de fin annonce les nouveaux records.</li>
         <li><b>Mode propriétaire.</b> Après le rachat de la station, la partie continue : une taxe de secteur remplace les échéances, les licences s'achètent avec tes crédits, et tu pars à la retraite quand tu veux.</li>
         <li>Nouvelle touche <kbd>L</kbd> pour la boutique de licences.</li>
+        <li><b>Stats des employés</b> : efficacité, endurance et sang-froid, de 1 à 5. La rareté découle de leur total, au lieu d'être tirée au hasard.</li>
+        <li><b>Équipe de départ</b> : toujours un mécanicien, un technicien et un commercial parmi les candidats, et l'équipe choisie doit compter un mécanicien et un technicien.</li>
       </ul>
     </div>
     <div class="version">
@@ -413,10 +415,15 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     ['Ancien pirate', 'Compte double contre les pirates, mais les frégates s’en méfient.', '', 'Licence'],
   ];
   const RARETES = [
-    ['Commun', '8b94a7', '60 %', 'Un employé ordinaire.'],
-    ['Rare', '4f9be5', '27 %', 'Travaille 15 % mieux, se fatigue un peu moins. Salaire +20 %.'],
-    ['Épique', 'b06cf0', '10 %', 'Travaille 30 % mieux, se fatigue moins, et a toujours une deuxième compétence. Salaire +45 %.'],
-    ['Légendaire', 'f5c542', '3 %', 'Travaille 50 % mieux, se fatigue beaucoup moins, deux compétences, et son moral ne descend jamais sous 40. Salaire +80 %.'],
+    ['Commun', '8b94a7', '9 ou moins', 'La plupart des candidats.'],
+    ['Rare', '4f9be5', '10 ou 11', 'Au-dessus du lot sur au moins une stat.'],
+    ['Épique', 'b06cf0', '12 ou 13', 'Solide partout, ou excellent avec une deuxième compétence.'],
+    ['Légendaire', 'f5c542', '14 ou plus', 'Rarissime : des stats au maximum ou presque.'],
+  ];
+  const STATS = [
+    ['Efficacité', 'Vitesse de travail', '85 %', '100 %', '115 %', '130 %', '150 %'],
+    ['Endurance', 'Vitesse de fatigue', '115 %', '100 %', '90 %', '80 %', '65 %'],
+    ['Sang-froid', 'Plancher du moral', '0', '0', '10', '25', '40'],
   ];
   const SUCCES = [
     ['Propriétaire', 'Racheter la station une première fois.'], ['Ponctuel', 'Racheter la station sans manquer une échéance.'],
@@ -498,7 +505,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <p>L'<b>oxygène</b> baisse quand il y a plus de personnes à bord que de places dans les recycleurs, équipages de passage compris. À 0 %, un membre de l'équipe meurt toutes les 60 secondes.</p>` },
     { groupe: 'L’équipage' },
     { id: 'personnel', titre: 'Personnel', corps: `
-      <p>Chaque employé a un <b>métier</b> (mécanique, technique, commerce, médecine ou sécurité), un <b>caractère</b> et une <b>rareté</b>. Il travaille à 100 % à un poste de son métier, à 50 % ailleurs.</p>
+      <p>Chaque employé a un <b>métier</b> (mécanique, technique, commerce, médecine ou sécurité), un <b>caractère</b> et trois <b>stats</b> qui donnent sa rareté. Il travaille à 100 % à un poste de son métier, à 50 % ailleurs.</p>
       ${tableau(['Poste', 'Métier idéal'], [['Atelier', 'Mécanique'], ['Recycleur, réacteur', 'Technique'], ['Quais, marché, cantine', 'Commerce'], ['Infirmerie', 'Médecine'], ['Poste de sécurité', 'Sécurité']])}
       <h3>Fatigue et moral</h3>
       <p>Le travail fatigue : un employé épuisé part dormir aux quartiers s'il trouve un lit. Tu peux aussi l'<b>envoyer se reposer</b> depuis sa fiche. Un moral bas le ralentit, et un employé démoralisé peut démissionner ou accepter l'offre de Vega.</p>
@@ -508,9 +515,11 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     { id: 'traits', titre: 'Caractères et raretés', corps: `
       <h3>Caractères</h3>
       ${tableau(['Caractère', 'Effet', 'Salaire', 'Débloqué par'], TRAITS.map(t => [t[0], t[1], t[2] || '-', t[3] || 'Dès le départ']))}
-      <h3>Raretés</h3>
-      <p>La rareté se voit à la couleur du liseré sur la carte d'un candidat.</p>
-      ${tableau(['Rareté', 'Chance', 'Effet'], RARETES.map(r => ['<span class="rar" style="color:#' + r[1] + '">' + r[0] + '</span>', r[2], r[3]]))}
+      <h3>Stats, note et rareté</h3>
+      <p>Chaque employé a trois stats, de 1 à 5, affichées en carrés sur sa carte (<code>Eff ■■■□□ End ■■□□□ S-f ■■■■□</code>).</p>
+      ${tableau(['Stat', 'Agit sur', '1', '2', '3', '4', '5'], STATS)}
+      <p>La <b>note</b> est le total des trois stats, plus 2 pour une deuxième compétence (de 3 à 17). C'est elle qui donne la <b>rareté</b>, la couleur du cadre, et qui fait monter le salaire.</p>
+      ${tableau(['Rareté', 'Note', 'En pratique'], RARETES.map(r => ['<span class="rar" style="color:#' + r[1] + '">' + r[0] + '</span>', r[2], r[3]]))}
       <h3>Espèces</h3>
       <p>Les candidats peuvent être humains ou extraterrestres : Velkans, Ossarites et Thuuls. L'espèce ne change pas les règles, seulement l'allure.</p>` },
     { groupe: 'Les dangers' },
