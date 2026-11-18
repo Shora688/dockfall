@@ -183,6 +183,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <a href="#accueil" data-onglet="accueil">Accueil</a>
       <a href="#telecharger" data-onglet="telecharger">Télécharger</a>
       <a href="#wiki" data-onglet="wiki">Wiki</a>
+      <a href="#classement" data-onglet="classement">Classement</a>
       <a href="#captures" data-onglet="captures">Captures</a>
       <a href="#nouveautes" data-onglet="nouveautes">Nouveautés</a>
     </nav>
@@ -266,7 +267,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   <div class="dl">
     <div class="carte cyan">
       <dl class="fiche">
-        <dt>Version</dt><dd>Prototype 0.3</dd>
+        <dt>Version</dt><dd>Prototype 0.4</dd>
         <dt>Système</dt><dd>Windows 10 ou 11, 64 bits</dd>
         <dt>Fichier</dt><dd><span id="dl-nom">Dockfall-windows.zip</span> • <span id="dl-taille">environ 50 Mo</span></dd>
         <dt>Langue</dt><dd>Français</dd>
@@ -313,6 +314,22 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   </div>
 </section>
 
+<!-- ============================== CLASSEMENT ============================== -->
+<section class="vue wrap" id="vue-classement" data-vue="classement" hidden>
+  <div class="pile" style="margin-bottom: 28px">
+    <p class="surtitre">Classement mondial</p>
+    <h2>Les plus longues concessions</h2>
+    <p class="lecture calme">La partie la plus longue gagne, en cycles, puis le meilleur score. Chaque joueur garde sa meilleure partie. Pour y figurer, choisis un pseudo dans le jeu (menu Classement, ou en fin de partie) : tes parties terminées sont envoyées toutes seules.</p>
+  </div>
+  <p class="note" id="classement-etat">Chargement du classement…</p>
+  <div class="tableau" id="classement-tableau" hidden>
+    <table>
+      <thead><tr><th>Rang</th><th>Pseudo</th><th>Cycles</th><th>Score</th><th>Secteur</th><th>Menace</th></tr></thead>
+      <tbody id="classement-lignes"></tbody>
+    </table>
+  </div>
+</section>
+
 <!-- ============================== CAPTURES ============================== -->
 <section class="vue wrap" id="vue-captures" data-vue="captures" hidden>
   <div class="pile" style="margin-bottom: 32px">
@@ -334,6 +351,14 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     <h2>Journal des versions</h2>
   </div>
   <div class="journal">
+    <div class="version">
+      <div><p class="num">0.4</p><p class="date">Novembre 2026</p></div>
+      <ul>
+        <li><b>Classement mondial</b> : la partie la plus longue gagne. Choisis un pseudo dans le jeu, tes parties terminées sont envoyées toutes seules, et le classement se consulte au menu ou sur ce site.</li>
+        <li><b>Mises à jour</b> : au lancement, le jeu prévient quand une nouvelle version est en ligne et ouvre la page de téléchargement.</li>
+        <li>Hors ligne, rien ne change : une partie non envoyée part au lancement suivant.</li>
+      </ul>
+    </div>
     <div class="version">
       <div><p class="num">0.3</p><p class="date">Novembre 2026</p></div>
       <ul>
@@ -374,7 +399,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
 <footer>
   <div class="wrap">
-    <span>Dockfall • prototype 0.3 • fait avec Godot 4</span>
+    <span>Dockfall • prototype 0.4 • fait avec Godot 4</span>
     <span>Police du site : VT323 et IBM Plex (licence OFL)</span>
   </div>
 </footer>
@@ -616,8 +641,23 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   });
   visionneuse.addEventListener('click', e => { if (e.target === visionneuse) visionneuse.close(); });
 
+  // ---------------------------------------------------------------- classement mondial (servi par /api/scores)
+  const SECTEURS_NOMS = { tarn: 'Tarn', nox: 'Nox', pell: 'Pell' };
+  function echapper(t) { return String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]); }
+  function chargerClassement() {
+    const etat = document.getElementById('classement-etat');
+    const bloc = document.getElementById('classement-tableau');
+    fetch('/api/scores', { cache: 'no-store' }).then(r => { if (!r.ok) throw new Error(); return r.json(); }).then(d => {
+      const top = d.top || [];
+      if (!top.length) { etat.textContent = 'Personne n\u2019est encore classé. Termine une partie pour ouvrir le bal.'; bloc.hidden = true; return; }
+      document.getElementById('classement-lignes').innerHTML = top.map(p => '<tr><td class="n">' + p.rang + '</td><td>' + echapper(p.pseudo) + (p.proprietaire ? ' <span class="calme">• propriétaire</span>' : '') + '</td><td class="n">' + p.cycles + '</td><td class="n">' + p.score.toLocaleString('fr-FR') + '</td><td>' + (SECTEURS_NOMS[p.secteur] || p.secteur) + '</td><td class="n">' + (p.menace || 0) + '</td></tr>').join('');
+      etat.textContent = d.total + (d.total > 1 ? ' joueurs classés.' : ' joueur classé.');
+      bloc.hidden = false;
+    }).catch(() => { etat.textContent = 'Classement indisponible pour le moment.'; etat.className = 'note alerte'; bloc.hidden = true; });
+  }
+
   // ---------------------------------------------------------------- navigation par onglets (#accueil, #wiki-modules…)
-  const VUES = ['accueil', 'telecharger', 'wiki', 'captures', 'nouveautes'];
+  const VUES = ['accueil', 'telecharger', 'wiki', 'classement', 'captures', 'nouveautes'];
   function router() {
     const h = (location.hash || '#accueil').slice(1);
     let vue = h.startsWith('wiki') ? 'wiki' : h;
@@ -627,6 +667,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       if (a.dataset.onglet === vue) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
     if (vue === 'wiki') afficherArticle(h.startsWith('wiki-') ? h.slice(5) : 'demarrer');
+    if (vue === 'classement') chargerClassement();
     window.scrollTo(0, 0);
   }
   window.addEventListener('hashchange', router);

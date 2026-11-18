@@ -1,0 +1,9 @@
+{
+  "name": "dockfall-site",
+  "private": true,
+  "type": "module",
+  "description": "Site et classement en ligne de Dockfall (Netlify).",
+  "dependencies": {
+    "@netlify/blobs": "8.1.0"
+  }
+}
