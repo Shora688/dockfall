@@ -267,7 +267,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   <div class="dl">
     <div class="carte cyan">
       <dl class="fiche">
-        <dt>Version</dt><dd>Prototype 0.7</dd>
+        <dt>Version</dt><dd>Prototype 0.8</dd>
         <dt>Système</dt><dd>Windows 10 ou 11, 64 bits</dd>
         <dt>Fichier</dt><dd><span id="dl-nom">Dockfall-windows.zip</span> • <span id="dl-taille">environ 50 Mo</span></dd>
         <dt>Langue</dt><dd>Français</dd>
@@ -352,6 +352,14 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   </div>
   <div class="journal">
     <div class="version">
+      <div><p class="num">0.8</p><p class="date">Novembre 2026</p></div>
+      <ul>
+        <li><b>9 nouvelles licences</b> (19 en tout) : fonds de roulement, bureau de recrutement, avocat, négociateur, carnet d'adresses, urbaniste, vétérans, équipe élargie, sursis.</li>
+        <li><b>4 défis</b> à choisir avant la partie : Énergie verte, Équipe réduite, Loup solitaire, Caisse vide. Plus de score, et 3 licences à la première réussite.</li>
+        <li>La liste des licences de la préparation défile et explique chaque licence.</li>
+      </ul>
+    </div>
+    <div class="version">
       <div><p class="num">0.7</p><p class="date">Novembre 2026</p></div>
       <ul>
         <li><b>Grands projets</b> (touche O) : balise, aile résidentielle, bouclier, chantier naval, siège de la guilde. De gros chantiers à effet permanent, qui rapportent du score.</li>
@@ -397,7 +405,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <ul>
         <li><b>Le rachat.</b> Paie la sixième échéance et la station est à toi : score bonus, fanfare.</li>
         <li><b>Menace 1 à 5.</b> Chaque victoire débloque un niveau de difficulté de plus : échéances plus lourdes, crises plus fréquentes, départ plus pauvre, Vasko plus rancunier, puis une seule échéance manquée et tout est perdu.</li>
-        <li><b>12 succès</b>, consultables depuis le menu principal.</li>
+        <li><b>Succès</b>, consultables depuis le menu principal.</li>
         <li><b>Aide-mémoire</b> en jeu (touche H) et <b>touches modifiables</b> dans les options.</li>
         <li><b>Missions</b> proposées par les personnages, rangées dans un volet qui sort du bord gauche (touche M).</li>
         <li><b>Améliorations de modules</b> jusqu'au niveau 3.</li>
@@ -422,7 +430,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
 <footer>
   <div class="wrap">
-    <span>Dockfall • prototype 0.7 • fait avec Godot 4</span>
+    <span>Dockfall • prototype 0.8 • fait avec Godot 4</span>
     <span>Police du site : VT323 et IBM Plex (licence OFL)</span>
   </div>
 </footer>
@@ -479,7 +487,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     ['Contre vents et Compagnie', 'Racheter la station en Menace 5.'], ['Plaque tournante', 'Servir 100 vaisseaux en une partie.'],
     ['Coffre plein', 'Avoir 10 000 ¢ en caisse.'], ['Pas sur mon quai', 'Repousser un abordage.'], ['Soldats du feu', 'Éteindre un incendie.'],
     ['Perle rare', 'Avoir un employé légendaire dans l’équipe.'], ['Haut de gamme', 'Amener un module au niveau 3.'],
-    ['Toujours partant', 'Réussir 5 missions en une partie.'],
+    ['Toujours partant', 'Réussir 5 missions en une partie.'], ['Ça passe ou ça casse', 'Racheter la station avec un défi.'],
   ];
   const tableau = (entetes, lignes) => '<div class="tableau"><table><thead><tr>' + entetes.map(e => '<th>' + e + '</th>').join('') +
     '</tr></thead><tbody>' + lignes.map(l => '<tr>' + l.map(c => '<td' + (typeof c === 'number' || /^[+\-]?\d/.test(String(c)) ? ' class="n"' : '') + '>' + c + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
@@ -659,12 +667,15 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       ${tableau(['Secteur', 'Clientèle', 'Prix', 'Pirates', 'Débloqué par'], [['Ceinture de Tarn', 'Mineurs et cargos, quelques paquebots.', '×1', 'rares', 'Dès le départ'], ['Marges du Nox', 'Contrebande et pirates.', '×1,15', 'fréquents', '5 licences'], ['Anneau de Pell', 'Paquebots de luxe et cargos riches. Vega y est féroce et l’oxygène part vite.', '×1,25', 'peu', '6 licences']])}` },
     { id: 'licences', titre: 'Licences', corps: `
       <p>À la fin de chaque partie, ton score se convertit en <b>licences</b> (une pour 60 points). Tu les dépenses à l'écran de préparation, et elles restent acquises pour toutes les parties suivantes. Une fois la station rachetée, tu peux aussi les acheter en jeu avec tes crédits : 1 500 ¢ par licence de coût (un réacteur, à 4 licences, coûte 6 000 ¢).</p>
-      ${tableau(['Licence', 'Coût', 'Effet'], [['Module : réacteur', 4, '+14 d’énergie, mais des incidents sans technicien.'], ['Module : cantine', 3, 'Fait payer les repas aux équipages de passage.'], ['Trait : infatigable', 2, 'Des candidats qui se fatiguent moins.'], ['Trait : loyal', 2, 'Des candidats que Vega ne peut pas débaucher.'], ['Trait : ancien pirate', 3, 'Des candidats redoutables contre les pirates.'], ['Trait : insomniaque', 2, 'Des candidats qui dorment peu, au prix de leur moral.'], ['Secteur : Marges du Nox', 5, 'Contrebande, pirates et clients plus riches.'], ['Secteur : Anneau de Pell', 6, 'Paquebots de luxe, clients généreux, Vega féroce.'], ['Station : l\u2019Épave', 3, 'Démarrer sur une épave usée, mais avec plus de crédits.'], ['Station : l\u2019Avant-poste', 4, 'Démarrer sur une ancienne base militaire, avec un poste de sécurité.']])}` },
+      ${tableau(['Licence', 'Coût', 'Effet'], [['Module : réacteur', 4, '+14 d’énergie, mais des incidents sans technicien.'], ['Module : cantine', 3, 'Fait payer les repas aux équipages de passage.'], ['Trait : infatigable', 2, 'Des candidats qui se fatiguent moins.'], ['Trait : loyal', 2, 'Des candidats que Vega ne peut pas débaucher.'], ['Trait : ancien pirate', 3, 'Des candidats redoutables contre les pirates.'], ['Trait : insomniaque', 2, 'Des candidats qui dorment peu, au prix de leur moral.'], ['Secteur : Marges du Nox', 5, 'Contrebande, pirates et clients plus riches.'], ['Secteur : Anneau de Pell', 6, 'Paquebots de luxe, clients généreux, Vega féroce.'], ['Station : l\u2019Épave', 3, 'Démarrer sur une épave usée, mais avec plus de crédits.'], ['Station : l\u2019Avant-poste', 4, 'Démarrer sur une ancienne base militaire, avec un poste de sécurité.'], ['Fonds de roulement', 2, '+500 ¢ en caisse au départ de chaque partie.'], ['Bureau de recrutement', 2, '2 tirages de candidats en plus à la préparation.'], ['Avocat d’affaires', 2, 'Les conditions peuvent être retirées 2 fois au lieu d’une.'], ['Négociateur', 3, 'Tanker et fournisseur 10 % moins chers.'], ['Carnet d’adresses', 3, 'Les missions rapportent 30 % de plus.'], ['Urbaniste', 3, 'Les grands projets s’ouvrent une échéance plus tôt.'], ['Vétérans', 4, 'Chaque candidat a +1 dans sa plus faible stat.'], ['Équipe élargie', 5, '4 personnes au départ au lieu de 3.'], ['Sursis', 6, 'La première échéance manquée de chaque partie est pardonnée.']])}
+      <h3>Défis</h3>
+      <p>À l'étape « station » de la préparation, tu peux choisir un défi : une contrainte pour toute la partie, contre plus de score. Racheter la station avec un défi le réussit ; la première fois, il rapporte <b>3 licences</b>, et le succès « Ça passe ou ça casse ».</p>
+      ${tableau(['Défi', 'Contrainte', 'Score'], [['Énergie verte', 'Réacteur interdit', '+20 %'], ['Équipe réduite', '2 personnes au départ', '+20 %'], ['Loup solitaire', 'Pas de missions', '+10 %'], ['Caisse vide', 'Départ avec 1 000 ¢', '+25 %']])}` },
     { id: 'menace', titre: 'Menace', corps: `
       <p>Racheter la station débloque le niveau de <b>Menace</b> suivant, jusqu'à 5. Tu le choisis sous les secteurs, à l'écran de préparation. Chaque niveau garde les effets des précédents et multiplie le score (+20 % par niveau).</p>
       ${tableau(['Niveau', 'Ce qui change'], [[0, 'Les conditions habituelles de la Compagnie.'], [1, 'Échéances 15 % plus lourdes.'], [2, 'Crises 25 % plus fréquentes.'], [3, 'Départ avec 2 200 ¢ au lieu de 3 000 ¢.'], [4, 'Vasko plus rancunier, tanker 20 % plus cher.'], [5, 'Une seule échéance manquée et la station est saisie.']])}` },
     { id: 'succes', titre: 'Succès', corps: `
-      <p>Douze succès, à consulter depuis le menu principal. Ils sont gardés d'une partie à l'autre.</p>
+      <p>Treize succès, à consulter depuis le menu principal. Ils sont gardés d'une partie à l'autre.</p>
       ${tableau(['Succès', 'Condition'], SUCCES)}` },
     { groupe: 'Pratique' },
     { id: 'touches', titre: 'Touches', corps: `
