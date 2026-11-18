@@ -267,7 +267,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   <div class="dl">
     <div class="carte cyan">
       <dl class="fiche">
-        <dt>Version</dt><dd>Prototype 0.5</dd>
+        <dt>Version</dt><dd>Prototype 0.6</dd>
         <dt>Système</dt><dd>Windows 10 ou 11, 64 bits</dd>
         <dt>Fichier</dt><dd><span id="dl-nom">Dockfall-windows.zip</span> • <span id="dl-taille">environ 50 Mo</span></dd>
         <dt>Langue</dt><dd>Français</dd>
@@ -352,6 +352,14 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   </div>
   <div class="journal">
     <div class="version">
+      <div><p class="num">0.6</p><p class="date">Novembre 2026</p></div>
+      <ul>
+        <li><b>Stations de départ</b> : le Relais, l'Épave (usée mais riche) et l'Avant-poste (militaire), à débloquer avec des licences.</li>
+        <li><b>Conditions de la concession</b> : un atout et un handicap tirés à chaque partie, à retirer une fois.</li>
+        <li>Préparation en trois étapes : secteur, station, équipe.</li>
+      </ul>
+    </div>
+    <div class="version">
       <div><p class="num">0.5</p><p class="date">Novembre 2026</p></div>
       <ul>
         <li><b>Voisinage</b> : la place des modules compte. Atelier collé au quai, marché à côté de l'entrepôt, cantine, infirmerie ou recycleur près des quartiers, sécurité près d'un quai : chaque paire donne un bonus. Le réacteur, lui, chauffe ses voisins.</li>
@@ -407,7 +415,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
 <footer>
   <div class="wrap">
-    <span>Dockfall • prototype 0.5 • fait avec Godot 4</span>
+    <span>Dockfall • prototype 0.6 • fait avec Godot 4</span>
     <span>Police du site : VT323 et IBM Plex (licence OFL)</span>
   </div>
 </footer>
@@ -611,11 +619,23 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       </div>
       <h3>Capitaines réguliers</h3>
       <p>Une dizaine de capitaines reviennent d'une partie à l'autre. Chacun garde une <b>relation</b> avec ta station : bien servis, ils reviennent plus souvent et peuvent te proposer un contrat (un vaisseau sur quatre sera le leur en échange d'une remise).</p>` },
+    { id: 'stations', titre: 'Stations et conditions', corps: `
+      <p>Chaque concession se prépare en trois étapes : le secteur, la station de départ, puis l'équipe. Deux choses changent d'une partie à l'autre : la station, et les conditions tirées au hasard.</p>
+      <h3>Stations de départ</h3>
+      ${tableau(['Station', 'Particularité', 'Débloquée par'], [
+        ['Le Relais', 'La station classique : rien de cassé, rien d\u2019offert.', 'Dès le départ'],
+        ['L\u2019Épave', 'Modules usés à 40 % et réputation au plus bas, mais 1 000 ¢ de plus en caisse.', '3 licences'],
+        ['L\u2019Avant-poste', 'Un poste de sécurité en plus, frégates 2,5 fois plus fréquentes, pirates plus rares.', '4 licences'],
+      ])}
+      <h3>Conditions de la concession</h3>
+      <p>Chaque partie tire un <b>atout</b> et un <b>handicap</b>. Tu peux les retirer une fois, à l'écran de préparation. En jeu, le panneau Secteur (S) les rappelle.</p>
+      ${tableau(['Atout', 'Effet'], [['Subvention de départ', '+1 500 ¢ en caisse'], ['Cales pleines', 'Carburant et pièces au maximum'], ['Bonne presse', 'Réputation +15'], ['Panneaux offerts', '+2 panneaux solaires'], ['Contrat avec la marine', 'Frégates militaires 2 fois plus fréquentes']])}
+      ${tableau(['Handicap', 'Effet'], [['Coque fatiguée', 'Modules 25 % plus usés'], ['Dette alourdie', 'Échéances +10 %'], ['Repaire pirate voisin', 'Pirates 50 % plus fréquents'], ['Mauvaise réputation', 'Réputation -10'], ['Syndicat exigeant', 'Salaires +15 %']])}` },
     { id: 'secteurs', titre: 'Secteurs', corps: `
       ${tableau(['Secteur', 'Clientèle', 'Prix', 'Pirates', 'Débloqué par'], [['Ceinture de Tarn', 'Mineurs et cargos, quelques paquebots.', '×1', 'rares', 'Dès le départ'], ['Marges du Nox', 'Contrebande et pirates.', '×1,15', 'fréquents', '5 licences'], ['Anneau de Pell', 'Paquebots de luxe et cargos riches. Vega y est féroce et l’oxygène part vite.', '×1,25', 'peu', '6 licences']])}` },
     { id: 'licences', titre: 'Licences', corps: `
       <p>À la fin de chaque partie, ton score se convertit en <b>licences</b> (une pour 60 points). Tu les dépenses à l'écran de préparation, et elles restent acquises pour toutes les parties suivantes. Une fois la station rachetée, tu peux aussi les acheter en jeu avec tes crédits : 1 500 ¢ par licence de coût (un réacteur, à 4 licences, coûte 6 000 ¢).</p>
-      ${tableau(['Licence', 'Coût', 'Effet'], [['Module : réacteur', 4, '+14 d’énergie, mais des incidents sans technicien.'], ['Module : cantine', 3, 'Fait payer les repas aux équipages de passage.'], ['Trait : infatigable', 2, 'Des candidats qui se fatiguent moins.'], ['Trait : loyal', 2, 'Des candidats que Vega ne peut pas débaucher.'], ['Trait : ancien pirate', 3, 'Des candidats redoutables contre les pirates.'], ['Trait : insomniaque', 2, 'Des candidats qui dorment peu, au prix de leur moral.'], ['Secteur : Marges du Nox', 5, 'Contrebande, pirates et clients plus riches.'], ['Secteur : Anneau de Pell', 6, 'Paquebots de luxe, clients généreux, Vega féroce.']])}` },
+      ${tableau(['Licence', 'Coût', 'Effet'], [['Module : réacteur', 4, '+14 d’énergie, mais des incidents sans technicien.'], ['Module : cantine', 3, 'Fait payer les repas aux équipages de passage.'], ['Trait : infatigable', 2, 'Des candidats qui se fatiguent moins.'], ['Trait : loyal', 2, 'Des candidats que Vega ne peut pas débaucher.'], ['Trait : ancien pirate', 3, 'Des candidats redoutables contre les pirates.'], ['Trait : insomniaque', 2, 'Des candidats qui dorment peu, au prix de leur moral.'], ['Secteur : Marges du Nox', 5, 'Contrebande, pirates et clients plus riches.'], ['Secteur : Anneau de Pell', 6, 'Paquebots de luxe, clients généreux, Vega féroce.'], ['Station : l\u2019Épave', 3, 'Démarrer sur une épave usée, mais avec plus de crédits.'], ['Station : l\u2019Avant-poste', 4, 'Démarrer sur une ancienne base militaire, avec un poste de sécurité.']])}` },
     { id: 'menace', titre: 'Menace', corps: `
       <p>Racheter la station débloque le niveau de <b>Menace</b> suivant, jusqu'à 5. Tu le choisis sous les secteurs, à l'écran de préparation. Chaque niveau garde les effets des précédents et multiplie le score (+20 % par niveau).</p>
       ${tableau(['Niveau', 'Ce qui change'], [[0, 'Les conditions habituelles de la Compagnie.'], [1, 'Échéances 15 % plus lourdes.'], [2, 'Crises 25 % plus fréquentes.'], [3, 'Départ avec 2 200 ¢ au lieu de 3 000 ¢.'], [4, 'Vasko plus rancunier, tanker 20 % plus cher.'], [5, 'Une seule échéance manquée et la station est saisie.']])}` },
