@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>html { -webkit-text-size-adjust: 100%; } body { margin: 0; } img { max-width: 100%; } [hidden] { display: none !important; }
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }</style>
+<title>Dockfall</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Dockfall: run a refueling station deep in debt to the Company. A pixel-art roguelite management game for Windows.">
+<link rel="icon" href="../images/icone.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Mise en page : un terminal de station. Barre d'onglets collante comme la barre du jeu, contenu en colonne,
+   le wiki en deux colonnes (sommaire + article). Thème unique sombre : c'est l'espace, comme dans le jeu. */
+:root {
+  --bg: #07090f; --panel: #0d1119; --panel-2: #131925; --line: #222a39; --line-2: #313b4f;
+  --ink: #e8e3d5; --text: #cfd4de; --quiet: #98a1b3; --dim: #6b7487;
+  --cyan: #4fd1c5; --cyan-deep: #123a37; --amber: #f5a524; --red: #e5484d; --red-ink: #ffd0d0;
+  --gold: #f5c542; --green: #8fd16a; --company: #9fb4d0; --vega: #c78bff;
+  --f-pixel: 'VT323', 'Courier New', monospace;
+  --f-body: 'IBM Plex Sans', system-ui, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 72px; }
+body { background: var(--bg); color: var(--text); font: 16px/1.6 var(--f-body); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--panel); }
+a { color: var(--cyan); }
+a:hover { color: var(--ink); }
+:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+img.pixel { image-rendering: pixelated; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.etoiles { position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background-image: radial-gradient(1px 1px at 12% 18%, #8b94a7 50%, transparent 51%), radial-gradient(1px 1px at 72% 9%, #c9d0dc 50%, transparent 51%),
+    radial-gradient(1px 1px at 33% 62%, #6b7487 50%, transparent 51%), radial-gradient(1px 1px at 88% 44%, #8b94a7 50%, transparent 51%),
+    radial-gradient(1px 1px at 52% 84%, #c9d0dc 50%, transparent 51%), radial-gradient(1px 1px at 6% 91%, #6b7487 50%, transparent 51%),
+    radial-gradient(1px 1px at 94% 78%, #6b7487 50%, transparent 51%), radial-gradient(1px 1px at 61% 33%, #8b94a7 50%, transparent 51%);
+  background-size: 420px 420px; }
+
+/* --- barre d'onglets ------------------------------------------------------------- */
+header.barre { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--panel) 94%, transparent); border-bottom: 1px solid var(--line); backdrop-filter: blur(6px); }
+header.barre .wrap { display: flex; align-items: center; gap: 20px; min-height: 56px; flex-wrap: wrap; }
+.logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font: 30px/1 var(--f-pixel); letter-spacing: 0.04em; }
+.logo img { width: 28px; height: 28px; }
+nav.onglets { display: flex; gap: 2px; flex-wrap: wrap; margin-left: auto; }
+nav.onglets a { font: 22px/1 var(--f-pixel); color: var(--quiet); text-decoration: none; padding: 8px 12px; border: 1px solid transparent; }
+nav.onglets a:hover { color: var(--ink); border-color: var(--line-2); }
+nav.onglets a[aria-current="page"] { color: var(--cyan); border-color: var(--cyan); background: var(--cyan-deep); }
+nav.onglets a.langue { margin-left: 8px; border-color: var(--line-2); color: var(--ink); }
+
+/* --- éléments communs ------------------------------------------------------------- */
+.vue[hidden] { display: none !important; }
+.vue { padding-block: 40px 72px; }
+h1, h2, h3 { font-family: var(--f-pixel); font-weight: 400; color: var(--ink); text-wrap: balance; margin: 0; letter-spacing: 0.02em; }
+h1 { font-size: clamp(44px, 7vw, 76px); line-height: 0.95; }
+h2 { font-size: 40px; line-height: 1; }
+h3 { font-size: 28px; line-height: 1.05; }
+p { margin: 0; }
+.surtitre { font: 500 12px/1.2 var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--cyan); }
+.calme { color: var(--quiet); }
+.lecture { max-width: 66ch; }
+.pile { display: flex; flex-direction: column; gap: 14px; }
+.bouton { display: inline-flex; align-items: center; gap: 10px; font: 24px/1 var(--f-pixel); padding: 12px 18px; text-decoration: none; border: 1px solid var(--line-2); color: var(--ink); background: var(--panel-2); cursor: pointer; }
+.bouton:hover { border-color: var(--cyan); color: var(--ink); }
+.bouton.principal { background: var(--cyan-deep); border-color: var(--cyan); color: var(--ink); }
+.bouton.principal:hover { background: #1a4d49; }
+.bouton[aria-disabled="true"] { opacity: 0.5; pointer-events: none; }
+.rangee { display: flex; flex-wrap: wrap; gap: 10px; }
+.capture { display: block; width: 100%; height: auto; border: 1px solid var(--line-2); background: #000; }
+figure { margin: 0; }
+figcaption { font: 13px/1.4 var(--f-mono); color: var(--quiet); margin-top: 8px; }
+.citation { border-left: 2px solid var(--company); padding: 4px 0 4px 18px; font-size: 18px; color: var(--company); max-width: 60ch; }
+.citation cite { display: block; margin-top: 6px; font: 500 12px/1.2 var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase; font-style: normal; color: var(--quiet); }
+
+/* --- accueil ------------------------------------------------------------- */
+.une { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 40px; align-items: center; padding-top: 16px; }
+.une .pile { gap: 20px; }
+.une .accroche { font-size: 19px; color: var(--text); max-width: 46ch; }
+.echeance { display: inline-flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; padding: 6px 12px; background: #1a0f12; border: 1px solid #5a2a2e; font: 22px/1 var(--f-pixel); width: fit-content; }
+.echeance b { color: var(--red); font-weight: 400; }
+.echeance span { color: var(--red-ink); font-variant-numeric: tabular-nums; }
+.station { position: relative; }
+.station img { width: 100%; height: auto; display: block; }
+.station .balise { position: absolute; left: 53.62%; top: 11.43%; width: 1.16%; height: 1.15%; background: var(--red); animation: balise 1.4s steps(1) infinite; }
+@keyframes balise { 50% { opacity: 0; } }
+.trois { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 28px; }
+.atout { display: flex; flex-direction: column; gap: 10px; }
+.atout h3 { font-size: 30px; }
+.bande { margin-top: 64px; display: flex; flex-direction: column; gap: 28px; }
+.visages { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+.visage { display: flex; gap: 12px; align-items: center; padding: 10px; background: var(--panel); border: 1px solid var(--line); }
+.visage img { width: 48px; height: 48px; flex: none; background: var(--panel-2); }
+.visage b { display: block; font: 22px/1 var(--f-pixel); color: var(--ink); font-weight: 400; }
+.visage small { display: block; font-size: 12.5px; line-height: 1.3; color: var(--quiet); margin-top: 3px; }
+
+/* --- téléchargement ------------------------------------------------------------- */
+.dl { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+.carte { background: var(--panel); border: 1px solid var(--line); padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+.carte.cyan { border-color: var(--cyan); }
+.fiche { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 18px; font: 14px/1.5 var(--f-mono); margin: 0; }
+.fiche dt { color: var(--quiet); }
+.fiche dd { margin: 0; color: var(--ink); font-variant-numeric: tabular-nums; }
+ol.etapes { margin: 0; padding-left: 1.4em; display: flex; flex-direction: column; gap: 8px; }
+.note { font-size: 14px; color: var(--quiet); }
+.note.alerte { color: var(--amber); }
+code, kbd { font: 13.5px/1.4 var(--f-mono); background: var(--panel-2); border: 1px solid var(--line-2); padding: 1px 6px; color: var(--ink); word-break: break-all; }
+kbd { word-break: normal; }
+
+/* --- wiki ------------------------------------------------------------- */
+.wiki { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 40px; align-items: start; }
+.sommaire { position: sticky; top: calc(76px + env(safe-area-inset-top, 0px)); display: flex; flex-direction: column; gap: 2px; max-height: calc(100vh - 100px); overflow-y: auto; }
+.sommaire .groupe { font: 500 11px/1 var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); margin: 14px 0 6px; }
+.sommaire .groupe:first-child { margin-top: 0; }
+.sommaire a { font: 21px/1.15 var(--f-pixel); color: var(--quiet); text-decoration: none; padding: 4px 10px; border-left: 2px solid transparent; }
+.sommaire a:hover { color: var(--ink); }
+.sommaire a[aria-current="true"] { color: var(--cyan); border-left-color: var(--cyan); background: var(--panel); }
+article.page { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+article.page h2 { margin-bottom: 2px; }
+article.page h3 { margin-top: 14px; font-size: 26px; color: var(--cyan); }
+article.page p, article.page li { max-width: 70ch; }
+article.page ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px; }
+.tableau { overflow-x: auto; border: 1px solid var(--line); }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 500 11.5px/1.3 var(--f-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--quiet); background: var(--panel); white-space: nowrap; }
+td.n { font-family: var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ink); }
+tr:last-child td { border-bottom: 0; }
+.pastille { display: inline-block; width: 10px; height: 10px; margin-right: 8px; vertical-align: 1px; }
+.rar { font: 20px/1 var(--f-pixel); }
+.encart { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--cyan); padding: 14px 16px; font-size: 15px; max-width: 70ch; }
+.encart.compagnie { border-left-color: var(--company); }
+.suite { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 18px; margin-top: 10px; }
+.suite a { font: 22px/1 var(--f-pixel); text-decoration: none; }
+.perso { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 16px; align-items: start; padding: 14px; background: var(--panel); border: 1px solid var(--line); }
+.perso img { width: 64px; height: 64px; background: var(--panel-2); }
+.perso b { font: 26px/1 var(--f-pixel); color: var(--ink); font-weight: 400; }
+.perso .role { font: 12px/1.3 var(--f-mono); color: var(--quiet); text-transform: uppercase; letter-spacing: 0.1em; margin: 4px 0 8px; }
+.grille-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+
+/* --- captures ------------------------------------------------------------- */
+.galerie { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 24px; }
+.galerie button { all: unset; cursor: zoom-in; display: block; }
+.galerie button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+dialog { padding: 0; border: 1px solid var(--line-2); background: var(--bg); max-width: min(1440px, 96vw); }
+dialog::backdrop { background: rgba(4, 6, 10, 0.88); }
+dialog img { display: block; width: 100%; height: auto; }
+dialog form { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; }
+dialog p { font: 14px/1.4 var(--f-mono); color: var(--quiet); }
+
+/* --- nouveautés ------------------------------------------------------------- */
+.journal { display: flex; flex-direction: column; gap: 40px; max-width: 760px; }
+.version { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 24px; }
+.version .num { font: 34px/1 var(--f-pixel); color: var(--ink); }
+.version .date { font: 12.5px/1.4 var(--f-mono); color: var(--quiet); margin-top: 6px; }
+.version ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 8px; }
+.version li b { color: var(--ink); font-weight: 600; }
+
+footer { border-top: 1px solid var(--line); padding-block: 28px 40px; font: 13px/1.6 var(--f-mono); color: var(--dim); }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 24px; }
+
+@media (max-width: 860px) {
+  .une, .dl, .wiki { grid-template-columns: minmax(0, 1fr); }
+  .sommaire { position: static; max-height: none; flex-direction: row; flex-wrap: wrap; gap: 4px; }
+  .sommaire .groupe { width: 100%; margin: 8px 0 2px; }
+  .sommaire a { border-left: 0; border: 1px solid var(--line); }
+  .sommaire a[aria-current="true"] { border-color: var(--cyan); }
+  .trois, .galerie, .grille-2 { grid-template-columns: minmax(0, 1fr); }
+  .version { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  nav.onglets { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .station .balise { animation: none; } }
+</style>
+</head>
+<body>
+<div class="etoiles" aria-hidden="true"></div>
+
+<header class="barre">
+  <div class="wrap">
+    <a class="logo" href="#accueil"><img class="pixel" src="../images/icone.png" alt="">DOCKFALL</a>
+    <nav class="onglets" aria-label="Site sections">
+      <a href="#accueil" data-onglet="accueil">Home</a>
+      <a href="#telecharger" data-onglet="telecharger">Download</a>
+      <a href="#wiki" data-onglet="wiki">Wiki</a>
+      <a href="#classement" data-onglet="classement">Leaderboard</a>
+      <a href="#captures" data-onglet="captures">Screenshots</a>
+      <a href="#nouveautes" data-onglet="nouveautes">News</a>
+      <a class="langue" href="../" data-langue="fr" title="Version française">FR</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<!-- ============================== HOME ============================== -->
+<section class="vue wrap" id="vue-accueil" data-vue="accueil">
+  <div class="une">
+    <div class="pile">
+      <p class="surtitre">Management • roguelite • pixel art • Windows</p>
+      <h1>A station.<br>A debt.<br>A record to beat.</h1>
+      <p class="accroche">You take over the Relay, a refueling station lost in the belt, and the debt that comes with it. Refuel ships, repair their hulls, keep your crew alive and pay the Company. Buy the station after six deadlines, then carry on as owner: the goal is the highest score.</p>
+      <p class="echeance" aria-label="Example deadline"><b>DEADLINE</b> <span>1/6 • 2,000 ¢ • <span id="compte">7.0</span> cycles</span></p>
+      <div class="rangee">
+        <a class="bouton principal" href="#telecharger">Download for Windows</a>
+        <a class="bouton" href="#wiki">Read the wiki</a>
+      </div>
+    </div>
+    <div class="station">
+      <img class="pixel" src="../images/station_art.png" alt="The Relay in cross-section: three floors of modules, the elevator in the middle and a freighter docked on the right." width="690" height="350">
+      <span class="balise" aria-hidden="true"></span>
+    </div>
+  </div>
+
+  <div class="bande">
+    <figure>
+      <img class="capture" src="../images/en/station.png" alt="A run in progress: the station in cross-section, a ship leaving after paying, the resource bar at the top." loading="lazy" width="1440" height="810">
+      <figcaption>A miner leaves and pays 535 ¢; the recycler has just been upgraded to level 2.</figcaption>
+    </figure>
+  </div>
+
+  <div class="bande">
+    <h2>What you do at the Relay</h2>
+    <div class="trois">
+      <div class="atout">
+        <h3>Sell at the right price</h3>
+        <p>Every ship pays for docking, fuel, repairs, trade and care at the price you set, down to the credit. Too expensive and it heads to Vega, the counter across the way. Too cheap and you work for nothing.</p>
+      </div>
+      <div class="atout">
+        <h3>Build and upgrade</h3>
+        <p>Docks, workshop, oxygen recycler, quarters, market, security post, reactor… Grow the station floor by floor and upgrade each module up to level 3. Keep an eye on energy: during a shortage, modules shut down.</p>
+      </div>
+      <div class="atout">
+        <h3>Run a crew</h3>
+        <p>Humans, Velkans, Ossarites, Thuuls: each has a job, a personality and a rarity, from common to legendary. They get tired, lose morale, and sometimes get poached by Vega.</p>
+      </div>
+      <div class="atout">
+        <h3>Take the hits</h3>
+        <p>A fire spreads through the workshop, three pirates come aboard, an inspector searches your holds. You send the crew, sound the alert, negotiate. And between two crises, Vasko Hale drops by to ask how your till is doing.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bande">
+    <blockquote class="citation">“Every station falls eventually. Yours can choose when.”<cite>Vasko Hale • the Company</cite></blockquote>
+  </div>
+
+  <div class="bande">
+    <h2>Who you'll meet</h2>
+    <div class="visages">
+      <div class="visage"><img class="pixel" src="../portraits/vasko_hale.png" alt=""><div><b>Vasko Hale</b><small>Director, the Company</small></div></div>
+      <div class="visage"><img class="pixel" src="../portraits/ines_calder.png" alt=""><div><b>Ines Calder</b><small>Manager of the Vega Counter</small></div></div>
+      <div class="visage"><img class="pixel" src="../portraits/mara_ilves.png" alt=""><div><b>Mara Ilves</b><small>Mechanic</small></div></div>
+      <div class="visage"><img class="pixel" src="../portraits/oskar_brenn.png" alt=""><div><b>Oskar Brenn</b><small>Captain of the miner Tarn-4</small></div></div>
+      <div class="visage"><img class="pixel" src="../portraits/lyra_vance.png" alt=""><div><b>Lyra Vance</b><small>Captain of the liner Aurélie</small></div></div>
+      <div class="visage"><img class="pixel" src="../portraits/sef_fantome.png" alt=""><div><b>Sef “Ghost”</b><small>Nox smuggler</small></div></div>
+    </div>
+    <div class="rangee"><a class="bouton" href="#wiki-personnages">All the characters</a></div>
+  </div>
+</section>
+
+<!-- ============================== DOWNLOAD ============================== -->
+<section class="vue wrap" id="vue-telecharger" data-vue="telecharger" hidden>
+  <div class="pile" style="margin-bottom: 32px">
+    <p class="surtitre">Download</p>
+    <h2>Dockfall for Windows</h2>
+    <p class="lecture calme">The game is a single file, no installation needed. Your run is saved at the end of every cycle and when you quit. When a new version comes out, an “Update” button appears in the menu and the game updates itself.</p>
+  </div>
+  <div class="dl">
+    <div class="carte cyan">
+      <dl class="fiche">
+        <dt>Version</dt><dd>Prototype 0.10</dd>
+        <dt>System</dt><dd>Windows 10 or 11, 64-bit</dd>
+        <dt>File</dt><dd><span id="dl-nom">Dockfall-windows.zip</span> • <span id="dl-taille">about 50 MB</span></dd>
+        <dt>Languages</dt><dd>English, French</dd>
+        <dt>Price</dt><dd>Free</dd>
+      </dl>
+      <div class="rangee">
+        <a class="bouton principal" id="dl-bouton" href="../telechargement/Dockfall-windows.zip">Download the game</a>
+      </div>
+      <p class="note" id="dl-note" hidden></p>
+    </div>
+    <div class="carte">
+      <h3>Install and play</h3>
+      <ol class="etapes">
+        <li>Unzip the archive wherever you like (right click, <i>Extract All</i>). Avoid <code>Program Files</code>: the game needs to be able to update itself.</li>
+        <li>Run <code>Dockfall.exe</code>.</li>
+        <li>If Windows shows “Windows protected your PC”, click <i>More info</i> then <i>Run anyway</i>. The game isn't signed yet, hence the warning.</li>
+        <li>Choose <i>New concession</i>. The tutorial guides you through your first run. The language can be changed in Options.</li>
+      </ol>
+      <p class="note">Save and settings: <code>%APPDATA%\Godot\app_userdata\Dockfall</code>. Delete this folder to start from scratch (licences and achievements included).</p>
+    </div>
+  </div>
+  <div class="bande">
+    <h3>Recommended specs</h3>
+    <div class="tableau">
+      <table>
+        <thead><tr><th>Component</th><th>Minimum</th></tr></thead>
+        <tbody>
+          <tr><td>Processor</td><td>Dual core, 2 GHz</td></tr>
+          <tr><td>Memory</td><td>2 GB</td></tr>
+          <tr><td>Graphics</td><td>Vulkan or OpenGL 3.3 compatible</td></tr>
+          <tr><td>Screen</td><td>1280 × 720 or more (windowed, or fullscreen with F11)</td></tr>
+          <tr><td>Disk space</td><td>150 MB</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== WIKI ============================== -->
+<section class="vue wrap" id="vue-wiki" data-vue="wiki" hidden>
+  <div class="wiki">
+    <nav class="sommaire" aria-label="Wiki articles" id="sommaire"></nav>
+    <article class="page" id="article" aria-live="polite"></article>
+  </div>
+</section>
+
+<!-- ============================== LEADERBOARD ============================== -->
+<section class="vue wrap" id="vue-classement" data-vue="classement" hidden>
+  <div class="pile" style="margin-bottom: 28px">
+    <p class="surtitre">World leaderboard</p>
+    <h2>The longest concessions</h2>
+    <p class="lecture calme">The longest run wins, in cycles, then the best score. Each player keeps their best run. To appear here, pick a nickname in the game (Leaderboard menu, or at the end of a run): your finished runs are sent automatically.</p>
+  </div>
+  <p class="note" id="classement-etat">Loading the leaderboard…</p>
+  <div class="tableau" id="classement-tableau" hidden>
+    <table>
+      <thead><tr><th>Rank</th><th>Nickname</th><th>Cycles</th><th>Score</th><th>Sector</th><th>Threat</th></tr></thead>
+      <tbody id="classement-lignes"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============================== SCREENSHOTS ============================== -->
+<section class="vue wrap" id="vue-captures" data-vue="captures" hidden>
+  <div class="pile" style="margin-bottom: 32px">
+    <p class="surtitre">Screenshots</p>
+    <h2>The Relay in pictures</h2>
+    <p class="calme">Every image comes straight from the game. Click to enlarge. Some screenshots show the French version.</p>
+  </div>
+  <div class="galerie" id="galerie"></div>
+  <dialog id="visionneuse">
+    <img id="visionneuse-img" alt="">
+    <form method="dialog"><p id="visionneuse-txt"></p><button class="bouton" value="fermer">Close</button></form>
+  </dialog>
+</section>
+
+<!-- ============================== NEWS ============================== -->
+<section class="vue wrap" id="vue-nouveautes" data-vue="nouveautes" hidden>
+  <div class="pile" style="margin-bottom: 36px">
+    <p class="surtitre">News</p>
+    <h2>Version history</h2>
+  </div>
+  <div class="journal">
+    <div class="version">
+      <div><p class="num">0.10</p><p class="date">November 2026</p></div>
+      <ul>
+        <li><b>English version</b>: the whole game is translated. Choose the language in Options; by default, French if Windows is in French, English otherwise.</li>
+      </ul>
+    </div>
+    <div class="version">
+      <div><p class="num">0.9</p><p class="date">November 2026</p></div>
+      <ul>
+        <li><b>Visible earnings</b>: each payment rises above the dock, in gold for big amounts.</li>
+        <li><b>End-of-run chart</b>: your till cycle by cycle, with paid and missed deadlines.</li>
+      </ul>
+    </div>
+    <div class="version">
+      <div><p class="num">0.8</p><p class="date">November 2026</p></div>
+      <ul>
+        <li><b>9 new licences</b> (19 in total): working capital, recruitment office, lawyer, negotiator, address book, urban planner, veterans, expanded crew, reprieve.</li>
+        <li><b>4 challenges</b> to pick before a run: Green energy, Skeleton crew, Lone wolf, Empty till. More score, and 3 licences on the first success.</li>
+      </ul>
+    </div>
+    <div class="version">
+      <div><p class="num">0.7</p><p class="date">November 2026</p></div>
+      <ul>
+        <li><b>Major projects</b> (O key): beacon, residential wing, shield, shipyard, guild headquarters. Big works with a permanent effect, worth score.</li>
+        <li><b>Late-game threats</b>: blockade, great raid, major storm and the Company's buyout offer.</li>
+      </ul>
+    </div>
+    <div class="version">
+      <div><p class="num">0.6</p><p class="date">November 2026</p></div>
+      <ul>
+        <li><b>Starting stations</b>: the Relay, the Wreck (worn but rich) and the Outpost (military), unlocked with licences.</li>
+        <li><b>Concession conditions</b>: a perk and a drawback drawn each run, redrawable once.</li>
+      </ul>
+    </div>
+    <div class="version">
+      <div><p class="num">0.5</p><p class="date">November 2026</p></div>
+      <ul>
+        <li><b>Adjacency</b>: module placement matters. Workshop next to a dock, market next to the warehouse, canteen, infirmary or recycler near the quarters, security near a dock: each pair gives a bonus. The reactor heats its neighbors.</li>
+        <li>Staff stats renamed Work, Stamina and Morale, shown as even squares.</li>
+      </ul>
+    </div>
+    <div class="version">
+      <div><p class="num">0.4</p><p class="date">November 2026</p></div>
+      <ul>
+        <li><b>World leaderboard</b>: the longest run wins. Pick a nickname in the game; finished runs are sent automatically.</li>
+        <li><b>Automatic updates</b>: when a new version comes out, an “Update” button appears in the menu. One click and the game downloads, checks, replaces and restarts itself. Save and licences are kept.</li>
+      </ul>
+    </div>
+    <div class="version">
+      <div><p class="num">0.3</p><p class="date">November 2026</p></div>
+      <ul>
+        <li><b>The goal is the score.</b> It's shown live at the top of the screen, and the end screen announces new records.</li>
+        <li><b>Owner mode.</b> After buying the station, the run goes on: a sector tax replaces the deadlines, licences are bought with credits, and you retire whenever you want.</li>
+        <li><b>Staff stats</b>: rarity now comes from their total, instead of being random.</li>
+      </ul>
+    </div>
+    <div class="version">
+      <div><p class="num">0.2</p><p class="date">November 2026</p></div>
+      <ul>
+        <li><b>The buyout</b>, <b>Threat levels 1 to 5</b>, <b>achievements</b>, a <b>quick guide</b> (H key) and <b>remappable keys</b>.</li>
+        <li><b>Missions</b>, <b>module upgrades</b>, <b>live crises</b> (spreading fires, boarding pirates), staff rarities and alien employees.</li>
+      </ul>
+    </div>
+    <div class="version">
+      <div><p class="num">0.1</p><p class="date">November 2026</p></div>
+      <ul>
+        <li>First playable prototype: cross-section station, ships, prices, staff, energy and oxygen, Company deadlines, choice events, licences, autosave, tutorial, music and sound.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Dockfall • prototype 0.10 • made with Godot 4</span>
+    <span>Site fonts: VT323 and IBM Plex (OFL license)</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // remember the language chosen with the FR | EN switch
+  document.querySelectorAll('a.langue').forEach(a => a.addEventListener('click', () => {
+    try { localStorage.setItem('dockfall-langue', a.dataset.langue); } catch (e) {}
+    a.href = a.getAttribute('href').split('#')[0] + location.hash;
+  }));
+
+  // ---------------------------------------------------------------- wiki data (taken from the game rules)
+  const MODULES = [
+    ['Solar panel', '4f79a8', 600, '+6', 5, 'Goes on the roof. The wider the station, the more room there is.'],
+    ['O2 recycler', '2e7fa3', 900, '-3', 10, 'Renews oxygen for 8 people, visiting crews included. Post: engineering.'],
+    ['Tank', 'f5a524', 500, '0', 5, '300 more u of fuel storage.'],
+    ['Dock S', '4fd1c5', 600, '-1', 10, 'Small dock: miners and smugglers only. Always at the end of a floor.'],
+    ['Dock M', '35a89d', 1100, '-1', 15, 'Large dock: every ship. Post: trade, refueling goes twice as fast.'],
+    ['Workshop', 'd9822b', 1200, '-3', 15, '2 mechanic posts: repairs docked ships and broken-down modules.'],
+    ['Quarters', '7a5c9e', 700, '-1', 5, '3 beds. One bed per person is needed to hire and to sleep.'],
+    ['Infirmary', 'dfe7f2', 800, '-2', 10, 'One doctor post: the injured and sick heal 4 times faster.'],
+    ['Warehouse', '8a7b62', 500, '0', 5, '40 more spare parts in stock.'],
+    ['Market', '8fd16a', 1000, '-2', 10, 'Ships sell their cargo here, you take a commission. Post: trade.'],
+    ['Security post', 'c0392b', 700, '-1', 10, '2 officers: each counts double against pirates and discourages inspectors.'],
+    ['Reactor', 'e5484d', 1800, '+14', 25, 'Licence. A big energy producer; without a technician on duty, beware of incidents.'],
+    ['Canteen', 'd9a441', 900, '-2', 10, 'Licence. Docked crews eat here: 30 ¢ per person per cycle.'],
+  ];
+  const AMELIORATIONS = [
+    ['Workshop', '+1 mechanic post, work +25 %'], ['Dock S and M', 'refueling 30 % faster, work +25 %'],
+    ['Recycler', '+4 oxygen places, work +25 %'], ['Tank', '+150 u of fuel'], ['Quarters', '+2 beds'],
+    ['Infirmary', 'care 25 % faster'], ['Warehouse', '+40 parts'], ['Market', 'trade 25 % faster'],
+    ['Security post', '+1 officer post, defense +25 %'], ['Reactor', '+6 energy'], ['Canteen', 'meals 25 % more profitable'],
+  ];
+  const TRAITS = [
+    ['Skilled', 'Works 30 % faster.', 'salary +10 %', ''],
+    ['Slow', 'Works 25 % slower, but costs less.', 'salary -20 %', ''],
+    ['Thrifty', 'Settles for a salary 25 % lower.', 'salary -25 %', ''],
+    ['Demanding', 'Good work (+15 %), but asks for more.', 'salary +30 %', ''],
+    ['Versatile', 'Works at 80 % outside their skill, instead of 50 %.', '', ''],
+    ['Tireless', 'Gets tired 40 % slower.', 'salary +10 %', 'Licence'],
+    ['Insomniac', 'Gets tired half as fast, but their morale slowly wears down.', '', 'Licence'],
+    ['Loyal', 'Vega can’t poach them, and they keep their morale.', '', 'Licence'],
+    ['Former pirate', 'Counts double against pirates, but frigates distrust them.', '', 'Licence'],
+  ];
+  const RARETES = [
+    ['Common', '8b94a7', '9 or less', 'Most candidates.'],
+    ['Rare', '4f9be5', '10 or 11', 'Above average in at least one stat.'],
+    ['Epic', 'b06cf0', '12 or 13', 'Solid everywhere, or excellent with a second skill.'],
+    ['Legendary', 'f5c542', '14 or more', 'Very rare: stats maxed out or nearly.'],
+  ];
+  const STATS = [
+    ['Work', 'Their work speed', '85 %', '100 %', '115 %', '130 %', '150 %'],
+    ['Stamina', 'Their fatigue (less is better)', '115 %', '100 %', '90 %', '80 %', '65 %'],
+    ['Morale', 'The floor of their morale', '0', '0', '10', '25', '40'],
+  ];
+  const SUCCES = [
+    ['Owner', 'Buy the station for the first time.'], ['Punctual', 'Buy the station without missing a deadline.'],
+    ['Nobody left behind', 'Buy the station without losing anyone.'], ['Globetrotter', 'Buy the station in all three sectors.'],
+    ['Against the winds and the Company', 'Buy the station at Threat 5.'], ['Hub', 'Serve 100 ships in one run.'],
+    ['Full vault', 'Have 10,000 ¢ in the till.'], ['Not on my dock', 'Repel a boarding.'], ['Firefighters', 'Put out a fire.'],
+    ['Rare gem', 'Have a legendary employee on the team.'], ['Top of the range', 'Bring a module to level 3.'],
+    ['Always up for it', 'Complete 5 missions in one run.'], ['Make or break', 'Buy the station with a challenge.'],
+  ];
+  const tableau = (entetes, lignes) => '<div class="tableau"><table><thead><tr>' + entetes.map(e => '<th>' + e + '</th>').join('') +
+    '</tr></thead><tbody>' + lignes.map(l => '<tr>' + l.map(c => '<td' + (typeof c === 'number' || /^[+\-]?\d/.test(String(c)) ? ' class="n"' : '') + '>' + c + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
+  const prix = n => n.toLocaleString('en-US') + ' ¢';
+  const perso = (id, nom, role, texte) => '<div class="perso"><img class="pixel" src="../portraits/' + id + '.png" alt=""><div><b>' + nom + '</b><p class="role">' + role + '</p><p>' + texte + '</p></div></div>';
+
+  const ARTICLES = [
+    { groupe: 'Getting started' },
+    { id: 'demarrer', titre: 'First steps', corps: `
+      <p>A Dockfall run is called a <b>concession</b>. You pick a sector, a starting station, three employees out of six candidates, then take charge of the Relay: a station in cross-section, with an elevator in the middle and docks at the ends of the floors.</p>
+      <h3>The first ten minutes</h3>
+      <ul>
+        <li>Let the first ships dock. Docking is automatic; you can switch to radar mode to accept or refuse each request.</li>
+        <li>Open <b>Prices</b> (T): set your prices and buy fuel from the tanker and parts from the supplier before you run out.</li>
+        <li>Open <b>Staff</b> (P): check that everyone holds a post that matches their job.</li>
+        <li>Build (C) quarters before hiring: one bed per person is needed.</li>
+        <li>Watch the <b>DEADLINE</b> box at the top right: the amount and the cycles left before the payment.</li>
+      </ul>
+      <div class="encart">A cycle lasts 2 minutes at normal speed. Space pauses; 1, 2 and 3 change the speed. The H key opens the quick guide at any time.</div>
+      <figure><img class="capture" src="../images/en/tutoriel.png" alt="The first tutorial tip." loading="lazy"><figcaption>The tutorial walks you through your first run.</figcaption></figure>` },
+    { id: 'echeances', titre: 'Score and buyout', corps: `
+      <p>The goal of Dockfall is the <b>highest score</b>. It's shown live in yellow at the top of the screen: it's what you keep if the run ends now. At the end of a run, it turns into licences (one per 60 points) and the menu keeps your record.</p>
+      ${tableau(['What counts', 'Points'], [['Each cycle survived', 10], ['Each 100 ¢ paid to the Company', 1], ['Your best reputation', '1 per point'], ['Each survivor at the end', 25], ['Buying the station', 500], ['Each major project completed', '200 to 700'], ['Each Threat level', '+20 % on the total']])}
+      <h3>Deadlines</h3>
+      <p>Every <b>7 cycles</b>, the Company takes a deadline payment from your till. The first is 2,000 ¢, the next ones rise sharply. The box at the top right shows its number (for example <code>3/6</code>), its amount and the cycles left.</p>
+      <h3>Buying the station</h3>
+      <p>Pay the <b>sixth deadline</b> and the Relay no longer belongs to the Company: +500 score, and the next Threat level is unlocked. You then choose to <b>carry on as owner</b> or to <b>retire</b> right away with that score.</p>
+      <h3>As owner</h3>
+      <ul>
+        <li>No more deadlines: the Company collects a <b>sector tax</b> every 7 cycles, half of the last deadline at first, then 10 % more each time.</li>
+        <li>You buy <b>licences with your credits</b> (Licences button, L key): they work right away and stay yours for the next runs.</li>
+        <li>Crises keep getting worse. Every cycle survived raises the score.</li>
+        <li>You leave whenever you want: <b>Retire</b>, in the pause menu, ends the run and keeps the score.</li>
+      </ul>
+      <h3>Losing</h3>
+      <ul>
+        <li>Two missed deadlines (or taxes): the Company seizes the station (just one at Threat 5). The score is kept anyway.</li>
+        <li>No oxygen for too long: the crew dies one after another.</li>
+        <li>Nobody left on board.</li>
+      </ul>
+      <h3>Period objectives</h3>
+      <p>For each 7-cycle period, the Company sets an objective: serve a number of ships, sell fuel, bill repairs, never go into the red, lose no one… Met, it lowers the next deadline by 15 %. Missed, it raises it by 10 %.</p>
+      <h3>Bonus after a paid deadline</h3>
+      <p>Each time you pay a deadline, pick one bonus out of three: grant, crate of 20 parts, full tanks, reputation +8, next deadline -10 %, rest and morale for all, free recruit, free solar panel, full overhaul of the modules, or good press with the captains.</p>` },
+    { groupe: 'Running the station' },
+    { id: 'argent', titre: 'Money and prices', corps: `
+      <p>Every docked ship pays a <b>docking fee</b>, then the services it asks for: fuel (per unit), repairs (per point), cargo sold at the market (per lot) and care (per point). You set each price down to the credit in the <b>Prices</b> panel.</p>
+      <ul>
+        <li>Too expensive, and the captain refuses the service, or goes straight to Vega.</li>
+        <li>The panel shows the sector's reference price and Vega's: that's your benchmark.</li>
+        <li>At the end of each cycle, you pay salaries and module upkeep.</li>
+        <li><b>Reputation</b> (star at the top) attracts more ships and makes captains more patient.</li>
+      </ul>
+      <div class="encart compagnie">Vega changes target from time to time: Ines Calder slashes her prices on fuel or on repairs. Keep an ear on the radio.</div>` },
+    { id: 'stocks', titre: 'Fuel and parts', corps: `
+      <p><b>Fuel</b> is bought in batches from the tanker, whose price changes every cycle. The <b>tank</b> increases your capacity. Without fuel, ships that came to refuel leave unhappy.</p>
+      <p><b>Spare parts</b> are bought from the supplier. The workshop uses them to repair ships, and idle mechanics use them to maintain worn modules. The <b>warehouse</b> increases your stock.</p>
+      <p>Each purchase brings a delivery ship that docks at your station for a few seconds.</p>` },
+    { id: 'modules', titre: 'Modules', corps: `
+      <p>Open <b>Build</b> (C), pick a module then a dotted slot. The station can grow 3 floors up and 4 floors down; docks always go at the end of a floor, facing space.</p>
+      ${tableau(['Module', 'Price', 'Energy', 'Upkeep', 'Role'], MODULES.map(m => ['<span class="pastille" style="background:#' + m[1] + '"></span>' + m[0], prix(m[2]), m[3], prix(m[4]), m[5]]))}
+      <h3>Upgrades</h3>
+      <p>Click a module to open its sheet, then <b>Upgrade</b>. Level 2 costs 60 % of the module's price, level 3 costs 120 %. An upgraded module uses a bit more energy and upkeep.</p>
+      ${tableau(['Module', 'Each extra level'], AMELIORATIONS)}
+      <h3>Wear and breakdowns</h3>
+      <p>A working module wears out. Below 35 % integrity, it may break down at the end of each cycle. Idle mechanics maintain it, one part per 10 integrity points.</p>` },
+    { id: 'voisinage', titre: 'Adjacency', corps: `
+      <p>Two modules that <b>touch</b>, side by side on the same floor or one above the other, can help each other. The elevator splits the station into left and right: modules don't touch through it.</p>
+      ${tableau(['Modules', 'Effect'], [
+        ['Workshop + dock', 'Repairs +30 % for ships docked at that dock'],
+        ['Market + warehouse', 'Trade +25 %'],
+        ['Canteen + quarters', 'Sleep 30 % more restful'],
+        ['Infirmary + quarters', 'Injured healed 30 % faster'],
+        ['Recycler + quarters', '+2 oxygen places'],
+        ['Security post + dock', 'Defense against boarding +50 %'],
+        ['Reactor + any module', 'Heat: the neighbor wears out 50 % faster'],
+      ])}
+      <h3>Seeing it in the game</h3>
+      <ul>
+        <li>A <b>green badge</b> on a shared wall shows a bonus, a <b>red</b> one the reactor's heat.</li>
+        <li>A module's sheet lists what its neighbors bring it, or suggests good neighbors if it has none.</li>
+        <li>In build mode, the hovered slot tells you in advance what effects it will bring.</li>
+      </ul>
+      <div class="encart">The reactor is powerful but hot: isolate it at the end of a floor, or next to a module whose wear matters little, like a warehouse.</div>` },
+    { id: 'energie', titre: 'Energy and oxygen', corps: `
+      <p>Solar panels (+6) and the reactor (+14) produce energy; almost every other module consumes it. The balance is shown at the top of the screen.</p>
+      <p>During a <b>shortage</b>, the station shuts modules down in this order: canteen, market, workshop, docks, security, quarters, infirmary, tank, and the recycler last. You can change the order by setting a module's <b>priority</b> on its sheet (low, normal, high).</p>
+      <p><b>Oxygen</b> drops when there are more people on board than places in the recyclers, visiting crews included. At 0 %, a crew member dies every 60 seconds.</p>` },
+    { id: 'projets', titre: 'Major projects', corps: `
+      <p>After the 2nd deadline, a <b>Projects</b> button (O key) appears. It offers five big works: one at a time, paid at launch, finished after a few cycles. The effect lasts the whole run, and each project is worth score.</p>
+      ${tableau(['Project', 'Price', 'Duration', 'Score', 'Effect'], [
+        ['Long-range beacon', prix(6000), '2 cycles', '+200', '30 % more ships'],
+        ['Residential wing', prix(9000), '2 cycles', '+200', '+4 beds and +6 oxygen places'],
+        ['Hull shield', prix(10000), '3 cycles', '+250', 'Wear -40 %, defense against boarding +50 %'],
+        ['Shipyard', prix(12000), '3 cycles', '+250', 'Repairs earn 40 % more'],
+        ['Guild headquarters', prix(20000), '4 cycles', '+700', 'Reputation +15'],
+      ])}
+      <h3>Late-game threats</h3>
+      <p>A station that earns big draws attention. From cycle 35, or once the station is bought:</p>
+      <ul>
+        <li><b>Blockade</b>: the Company cuts off the tanker and supplier for two cycles, unless you pay for an arrangement.</li>
+        <li><b>Great raid</b>: a flotilla of 5 or more pirates. Ransom, or a fight on board.</li>
+        <li><b>Major storm</b>: panels blind for a cycle and a half, and a module broken down.</li>
+        <li><b>Buyout offer</b> (owner): sell to the Company and leave with +400 score, or refuse and see taxes rise by 15 % forever.</li>
+      </ul>` },
+    { groupe: 'The crew' },
+    { id: 'personnel', titre: 'Staff', corps: `
+      <p>Each employee has a <b>job</b> (mechanics, engineering, trade, medicine or security), a <b>personality</b> and three <b>stats</b> that give their rarity. They work at 100 % at a post of their job, at 50 % elsewhere.</p>
+      ${tableau(['Post', 'Ideal job'], [['Workshop', 'Mechanics'], ['Recycler, reactor', 'Engineering'], ['Docks, market, canteen', 'Trade'], ['Infirmary', 'Medicine'], ['Security post', 'Security']])}
+      <h3>Fatigue and morale</h3>
+      <p>Work is tiring: an exhausted employee goes to sleep in the quarters if a bed is free. You can also <b>send them to rest</b> from their sheet. Low morale slows them down, and a demoralized employee may quit or accept Vega's offer.</p>
+      <h3>Hiring</h3>
+      <p>A shuttle brings new candidates every cycle (Hire tab). Hiring costs a bonus of two cycles of salary, and a free bed is needed.</p>
+      <figure><img class="capture" src="../images/en/personnel.png" alt="The Staff panel: posts, employees and an employee's sheet." loading="lazy"><figcaption>The Staff panel: each post, its ideal job, and an employee's detailed sheet.</figcaption></figure>` },
+    { id: 'traits', titre: 'Personalities and rarity', corps: `
+      <h3>Personalities</h3>
+      ${tableau(['Personality', 'Effect', 'Salary', 'Unlocked by'], TRAITS.map(t => [t[0], t[1], t[2] || '-', t[3] || 'From the start']))}
+      <h3>Stats, rating and rarity</h3>
+      <p>Each employee has three stats, from 1 to 5, shown as squares on their card: <b>Work</b> (their speed), <b>Stamina</b> (they resist fatigue) and <b>Morale</b> (they hold up when things go wrong). The more filled squares, the better.</p>
+      ${tableau(['Stat', 'Affects', '1', '2', '3', '4', '5'], STATS)}
+      <p>The <b>rating</b> is the total of the three stats, plus 2 for a second skill (from 3 to 17). It sets the <b>rarity</b>, the color of the frame, and raises the salary.</p>
+      ${tableau(['Rarity', 'Rating', 'In practice'], RARETES.map(r => ['<span class="rar" style="color:#' + r[1] + '">' + r[0] + '</span>', r[2], r[3]]))}
+      <h3>Species</h3>
+      <p>Candidates can be human or alien: Velkans, Ossarites and Thuuls. Species doesn't change the rules, only the looks.</p>
+      <figure><img class="capture" src="../images/en/equipe.png" alt="Picking the starting crew." loading="lazy"><figcaption>Picking the starting crew: stats, rating and rarity on each card.</figcaption></figure>` },
+    { groupe: 'Dangers' },
+    { id: 'crises', titre: 'Crises', corps: `
+      <p>Crises strike regularly, more and more often as the run goes on. Some play out live on the station, others ask you to choose.</p>
+      <h3>Fire</h3>
+      <p>Fire breaks out in a module and damages it. Click it and choose <b>Send the crew to put it out</b>: the two nearest people run there. Without a reaction, the fire spreads to the next module after 20 seconds and injures those working there.</p>
+      <h3>Pirates and boarding</h3>
+      <p>A pirate fighter demands a ransom. If you resist, they come aboard: they steal credits and fuel every second and may injure your crew. Everyone fights, security officers count much more, and the <b>general alert</b> (A) doubles defense. Repelling them earns reputation; after 25 seconds, they leave with their loot.</p>
+      <h3>Company inspection</h3>
+      <p>An inspector records your infractions and fines you: contraband hidden on board, traces of smugglers, stale air, overcrowding, exhausted staff, late salaries, worn-out modules. The Sector panel (S) shows what they would find today.</p>
+      <h3>And also</h3>
+      <ul>
+        <li><b>Solar storm</b>: solar panels stop producing for a while.</li>
+        <li><b>Oxygen leak</b>: oxygen drops fast until it's sealed.</li>
+        <li><b>Breakdown</b> and <b>sabotage</b>: a module stops until a mechanic repairs it.</li>
+        <li><b>Epidemic</b>: a sick crew at the dock can infect yours.</li>
+        <li><b>Poaching</b>: Ines Calder tries to hire one of your employees.</li>
+      </ul>
+      <figure><img class="capture" src="../images/en/evenement.png" alt="A poaching event: Ines Calder makes an offer to Mara Ilves." loading="lazy"><figcaption>An event: Ines Calder tries to poach Mara. Raise, persuade, or let her go.</figcaption></figure>` },
+    { id: 'missions', titre: 'Missions', corps: `
+      <p>From time to time, a character offers you a small mission. The <b>MISSIONS</b> tab, on the left edge of the screen, blinks when an offer arrives. Click it or press M to open the panel.</p>
+      ${tableau(['Who', 'Mission'], [['Vasko Hale', 'Serve 3 ships by the end of the cycle, or take in 600 ¢ in services.'], ['Oskar Brenn', 'Sell 120 u of fuel within the cycle.'], ['Lyra Vance', 'No unhappy customer during the cycle.'], ['Cdr Ayo Korr', 'Deliver 10 spare parts right away.'], ['A docked captain', 'Repair their ship in under 40 seconds.']])}
+      <p>You have 35 seconds to accept an offer. Only one mission can be active. Success earns credits (and sometimes reputation); failure costs 1 reputation point.</p>` },
+    { groupe: 'The world' },
+    { id: 'personnages', titre: 'Characters', corps: `
+      <p>They talk on the radio, make offers and remember what you did.</p>
+      <div class="pile">
+        ${perso('vasko_hale', 'Vasko Hale', 'Director, the Company', 'Your creditor, always polite. He offers loans repaid with the deadline, containers not to open and “voluntary contributions”. Refuse too often and the Company takes revenge: higher deadline, blocked deliveries, inspectors sent.')}
+        ${perso('ines_calder', 'Ines Calder', 'Manager of the Vega Counter', 'Your direct competitor. She slashes prices and tries to poach your staff, but also offers an alliance against pirates, or to buy your surplus fuel.')}
+        ${perso('mara_ilves', 'Mara Ilves', 'Mechanic', 'Often in your starting crew. She reports breakdowns on the radio and sometimes has an idea to improve the recycler.')}
+        ${perso('oskar_brenn', 'Oskar Brenn', 'Captain of the miner Tarn-4', 'A regular. He organizes contests between miners and offers fuel missions for the mining fleet.')}
+        ${perso('lyra_vance', 'Lyra Vance', 'Captain of the liner Aurélie', 'Her passengers are bored: she offers station tours and great publicity if no one leaves unhappy.')}
+        ${perso('sef_fantome', 'Sef “Ghost”', 'Nox smuggler', 'He pays well for a crate to disappear for a few cycles. The inspector might find it, though.')}
+        ${perso('ayo_korr', 'Cdr Ayo Korr', 'Frigate ASN Korr', 'The navy. She orders parts in a hurry and distrusts former pirates.')}
+      </div>
+      <h3>Regular captains</h3>
+      <p>About ten captains come back from one run to the next. Each keeps a <b>relation</b> with your station: well served, they come back more often and may offer a contract (one ship in four will be theirs in exchange for a discount).</p>` },
+    { id: 'stations', titre: 'Stations and conditions', corps: `
+      <p>Each concession is prepared in three steps: the sector, the starting station, then the crew. Two things change from one run to the next: the station, and the conditions drawn at random.</p>
+      <h3>Starting stations</h3>
+      ${tableau(['Station', 'Feature', 'Unlocked by'], [
+        ['The Relay', 'The classic station: nothing broken, nothing free.', 'From the start'],
+        ['The Wreck', 'Modules worn to 40 % and reputation at rock bottom, but 1,000 ¢ more in the till.', '3 licences'],
+        ['The Outpost', 'An extra security post, frigates 2.5 times more frequent, pirates rarer.', '4 licences'],
+      ])}
+      <h3>Concession conditions</h3>
+      <p>Each run draws a <b>perk</b> and a <b>drawback</b>. You can redraw them once, on the preparation screen. In the game, the Sector panel (S) reminds you of them.</p>
+      ${tableau(['Perk', 'Effect'], [['Starting grant', '+1,500 ¢ in the till'], ['Full holds', 'Fuel and parts maxed out'], ['Good press', 'Reputation +15'], ['Free panels', '+2 solar panels'], ['Navy contract', 'Military frigates twice as frequent']])}
+      ${tableau(['Drawback', 'Effect'], [['Tired hull', 'Modules wear 25 % faster'], ['Heavier debt', 'Deadlines +10 %'], ['Pirate den nearby', 'Pirates 50 % more frequent'], ['Bad reputation', 'Reputation -10'], ['Demanding union', 'Salaries +15 %']])}` },
+    { id: 'secteurs', titre: 'Sectors', corps: `
+      ${tableau(['Sector', 'Customers', 'Prices', 'Pirates', 'Unlocked by'], [['Tarn Belt', 'Miners and freighters, a few liners.', '×1', 'rare', 'From the start'], ['Nox Fringes', 'Smuggling and pirates.', '×1.15', 'frequent', '5 licences'], ['Pell Ring', 'Luxury liners and wealthy freighters. Vega is fierce and oxygen goes fast.', '×1.25', 'few', '6 licences']])}` },
+    { id: 'licences', titre: 'Licences', corps: `
+      <p>At the end of each run, your score turns into <b>licences</b> (one per 60 points). You spend them on the preparation screen, and they stay yours for all following runs. Once the station is bought, you can also buy them in the game with your credits: 1,500 ¢ per licence point (a reactor, at 4 licences, costs 6,000 ¢).</p>
+      ${tableau(['Licence', 'Cost', 'Effect'], [['Module: reactor', 4, '+14 energy, but incidents without a technician.'], ['Module: canteen', 3, 'Charges visiting crews for meals.'], ['Trait: tireless', 2, 'Candidates who get tired less.'], ['Trait: loyal', 2, 'Candidates Vega can’t poach.'], ['Trait: former pirate', 3, 'Candidates formidable against pirates.'], ['Trait: insomniac', 2, 'Candidates who sleep little, at the cost of their morale.'], ['Sector: Nox Fringes', 5, 'Smuggling, pirates and richer customers.'], ['Sector: Pell Ring', 6, 'Luxury liners, generous customers, fierce Vega.'], ['Station: the Wreck', 3, 'Start on a worn-out wreck, but with more credits.'], ['Station: the Outpost', 4, 'Start on a former military base, with a security post.'], ['Working capital', 2, '+500 ¢ in the till at the start of every run.'], ['Recruitment office', 2, '2 extra candidate draws during preparation.'], ['Business lawyer', 2, 'Conditions can be redrawn 2 times instead of once.'], ['Negotiator', 3, 'Tanker and supplier 10 % cheaper.'], ['Address book', 3, 'Missions pay 30 % more.'], ['Urban planner', 3, 'Major projects open one deadline earlier.'], ['Veterans', 4, 'Each candidate gets +1 in their weakest stat.'], ['Expanded crew', 5, '4 people at the start instead of 3.'], ['Reprieve', 6, 'The first missed deadline of each run is forgiven.']])}
+      <h3>Challenges</h3>
+      <p>At the “station” step of the preparation, you can pick a challenge: a constraint for the whole run, in exchange for more score. Buying the station with a challenge completes it; the first time, it earns <b>3 licences</b> and the “Make or break” achievement.</p>
+      ${tableau(['Challenge', 'Constraint', 'Score'], [['Green energy', 'Reactor forbidden', '+20 %'], ['Skeleton crew', '2 people at the start', '+20 %'], ['Lone wolf', 'No missions', '+10 %'], ['Empty till', 'Start with 1,000 ¢', '+25 %']])}` },
+    { id: 'menace', titre: 'Threat', corps: `
+      <p>Buying the station unlocks the next <b>Threat</b> level, up to 5. You choose it below the sectors, on the preparation screen. Each level keeps the effects of the previous ones and multiplies the score (+20 % per level).</p>
+      ${tableau(['Level', 'What changes'], [[0, 'The Company’s usual terms.'], [1, 'Deadlines 15 % heavier.'], [2, 'Crises 25 % more frequent.'], [3, 'Start with 2,200 ¢ instead of 3,000 ¢.'], [4, 'Vasko holds more grudges, tanker 20 % more expensive.'], [5, 'A single missed deadline and the station is seized.']])}` },
+    { id: 'succes', titre: 'Achievements', corps: `
+      <p>Thirteen achievements, viewable from the main menu. They're kept from one run to the next.</p>
+      ${tableau(['Achievement', 'Condition'], SUCCES)}` },
+    { groupe: 'Practical' },
+    { id: 'touches', titre: 'Keys', corps: `
+      <p>Shortcuts can be changed in <b>Options › Keyboard keys</b>, in the main menu. Here are the default keys.</p>
+      ${tableau(['Key', 'Action'], [['<kbd>C</kbd>', 'Build'], ['<kbd>P</kbd>', 'Staff'], ['<kbd>T</kbd>', 'Prices, tanker and supplier'], ['<kbd>S</kbd>', 'Sector: Vega, captains, inspection'], ['<kbd>M</kbd>', 'Missions panel'], ['<kbd>O</kbd>', 'Major projects (after the 2nd deadline)'], ['<kbd>L</kbd>', 'Licences (once owner)'], ['<kbd>A</kbd>', 'General alert'], ['<kbd>Space</kbd>', 'Pause'], ['<kbd>H</kbd>', 'Quick guide'], ['<kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>', 'Normal speed, ×2, ×3 (fixed)'], ['<kbd>Esc</kbd>', 'Close a panel, pause menu (fixed)'], ['Wheel', 'Zoom'], ['Arrows, middle click', 'Move the view'], ['<kbd>F11</kbd>', 'Fullscreen (fixed)']])}` },
+  ];
+  const PAGES = ARTICLES.filter(a => a.id);
+
+  // ---------------------------------------------------------------- wiki
+  const sommaire = document.getElementById('sommaire');
+  sommaire.innerHTML = ARTICLES.map(a => a.groupe ? '<p class="groupe">' + a.groupe + '</p>' : '<a href="#wiki-' + a.id + '" data-article="' + a.id + '">' + a.titre + '</a>').join('');
+  function afficherArticle(id) {
+    const i = Math.max(0, PAGES.findIndex(p => p.id === id));
+    const a = PAGES[i];
+    const avant = PAGES[i - 1], apres = PAGES[i + 1];
+    document.getElementById('article').innerHTML = '<p class="surtitre">Wiki</p><h2>' + a.titre + '</h2>' + a.corps +
+      '<div class="suite">' + (avant ? '<a href="#wiki-' + avant.id + '">‹ ' + avant.titre + '</a>' : '<span></span>') +
+      (apres ? '<a href="#wiki-' + apres.id + '">' + apres.titre + ' ›</a>' : '') + '</div>';
+    sommaire.querySelectorAll('a').forEach(l => l.setAttribute('aria-current', l.dataset.article === a.id ? 'true' : 'false'));
+  }
+
+  // ---------------------------------------------------------------- screenshots
+  const CAPTURES = [
+    ['en/station.png', 'A miner leaves and pays; the recycler reaches level 2.'],
+    ['en/tutoriel.png', 'The tutorial welcomes you to the Relay.'],
+    ['en/evenement.png', 'Ines Calder tries to poach Mara.'],
+    ['en/personnel.png', 'The Staff panel and an employee’s sheet.'],
+    ['en/equipe.png', 'Picking the starting crew.'],
+    ['incendie.png', 'Fire in the workshop: the crew runs to put it out (French version).'],
+    ['abordage.png', 'Boarding: three pirates on board (French version).'],
+    ['victoire.png', 'The station is bought: carry on as owner or retire (French version).'],
+    ['en/menu.png', 'The main menu.'],
+  ];
+  const galerie = document.getElementById('galerie');
+  galerie.innerHTML = CAPTURES.map((c, i) => '<figure><button type="button" data-i="' + i + '" aria-label="Enlarge: ' + c[1] + '"><img class="capture" src="../images/' + c[0] + '" alt="' + c[1] + '" loading="lazy" width="1440" height="810"></button><figcaption>' + c[1] + '</figcaption></figure>').join('');
+  const visionneuse = document.getElementById('visionneuse');
+  galerie.addEventListener('click', e => {
+    const b = e.target.closest('button[data-i]');
+    if (!b) return;
+    const c = CAPTURES[+b.dataset.i];
+    document.getElementById('visionneuse-img').src = '../images/' + c[0];
+    document.getElementById('visionneuse-img').alt = c[1];
+    document.getElementById('visionneuse-txt').textContent = c[1];
+    if (visionneuse.showModal) visionneuse.showModal();
+  });
+  visionneuse.addEventListener('click', e => { if (e.target === visionneuse) visionneuse.close(); });
+
+  // ---------------------------------------------------------------- world leaderboard (served by /api/scores)
+  const SECTEURS_NOMS = { tarn: 'Tarn', nox: 'Nox', pell: 'Pell' };
+  function echapper(t) { return String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]); }
+  function chargerClassement() {
+    const etat = document.getElementById('classement-etat');
+    const bloc = document.getElementById('classement-tableau');
+    fetch('/api/scores', { cache: 'no-store' }).then(r => { if (!r.ok) throw new Error(); return r.json(); }).then(d => {
+      const top = d.top || [];
+      if (!top.length) { etat.textContent = 'Nobody is ranked yet. Finish a run to get things started.'; bloc.hidden = true; return; }
+      document.getElementById('classement-lignes').innerHTML = top.map(p => '<tr><td class="n">' + p.rang + '</td><td>' + echapper(p.pseudo) + (p.proprietaire ? ' <span class="calme">• owner</span>' : '') + '</td><td class="n">' + p.cycles + '</td><td class="n">' + p.score.toLocaleString('en-US') + '</td><td>' + (SECTEURS_NOMS[p.secteur] || p.secteur) + '</td><td class="n">' + (p.menace || 0) + '</td></tr>').join('');
+      etat.textContent = d.total + (d.total > 1 ? ' players ranked.' : ' player ranked.');
+      bloc.hidden = false;
+    }).catch(() => { etat.textContent = 'Leaderboard unavailable for now.'; etat.className = 'note alerte'; bloc.hidden = true; });
+  }
+
+  // ---------------------------------------------------------------- tab navigation (#accueil, #wiki-modules…)
+  const VUES = ['accueil', 'telecharger', 'wiki', 'classement', 'captures', 'nouveautes'];
+  function router() {
+    const h = (location.hash || '#accueil').slice(1);
+    let vue = h.startsWith('wiki') ? 'wiki' : h;
+    if (!VUES.includes(vue)) vue = 'accueil';
+    document.querySelectorAll('[data-vue]').forEach(s => { s.hidden = s.dataset.vue !== vue; });
+    document.querySelectorAll('[data-onglet]').forEach(a => {
+      if (a.dataset.onglet === vue) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
+    if (vue === 'wiki') afficherArticle(h.startsWith('wiki-') ? h.slice(5) : 'demarrer');
+    if (vue === 'classement') chargerClassement();
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', router);
+  router();
+
+  // ---------------------------------------------------------------- download: is the file online?
+  const bouton = document.getElementById('dl-bouton');
+  fetch(bouton.getAttribute('href'), { method: 'HEAD' }).then(r => {
+    if (!r.ok) throw new Error('absent');
+    const octets = +r.headers.get('content-length');
+    if (octets > 0) document.getElementById('dl-taille').textContent = Math.round(octets / 1048576) + ' MB';
+  }).catch(() => {
+    bouton.setAttribute('aria-disabled', 'true');
+    bouton.removeAttribute('href');
+    const note = document.getElementById('dl-note');
+    note.hidden = false;
+    note.className = 'note alerte';
+    note.textContent = 'The file isn’t online on this version of the site yet. It will be available here as soon as it’s published.';
+  });
+
+  // ---------------------------------------------------------------- the home page deadline ticks down
+  const compte = document.getElementById('compte');
+  let reste = 7.0;
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    setInterval(() => { reste = reste <= 0.1 ? 7.0 : reste - 0.1; compte.textContent = reste.toFixed(1); }, 1700);
+  }
+})();
+</script>
+</body>
+</html>
