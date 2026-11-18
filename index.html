@@ -267,7 +267,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   <div class="dl">
     <div class="carte cyan">
       <dl class="fiche">
-        <dt>Version</dt><dd>Prototype 0.4.1</dd>
+        <dt>Version</dt><dd>Prototype 0.4.2</dd>
         <dt>Système</dt><dd>Windows 10 ou 11, 64 bits</dd>
         <dt>Fichier</dt><dd><span id="dl-nom">Dockfall-windows.zip</span> • <span id="dl-taille">environ 50 Mo</span></dd>
         <dt>Langue</dt><dd>Français</dd>
@@ -399,7 +399,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
 <footer>
   <div class="wrap">
-    <span>Dockfall • prototype 0.4.1 • fait avec Godot 4</span>
+    <span>Dockfall • prototype 0.4.2 • fait avec Godot 4</span>
     <span>Police du site : VT323 et IBM Plex (licence OFL)</span>
   </div>
 </footer>
@@ -446,9 +446,9 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     ['Légendaire', 'f5c542', '14 ou plus', 'Rarissime : des stats au maximum ou presque.'],
   ];
   const STATS = [
-    ['Efficacité', 'Vitesse de travail', '85 %', '100 %', '115 %', '130 %', '150 %'],
-    ['Endurance', 'Vitesse de fatigue', '115 %', '100 %', '90 %', '80 %', '65 %'],
-    ['Sang-froid', 'Plancher du moral', '0', '0', '10', '25', '40'],
+    ['Travail', 'Sa vitesse de travail', '85 %', '100 %', '115 %', '130 %', '150 %'],
+    ['Forme', 'Sa fatigue (moins, c\u2019est mieux)', '115 %', '100 %', '90 %', '80 %', '65 %'],
+    ['Moral', 'Le plancher de son moral', '0', '0', '10', '25', '40'],
   ];
   const SUCCES = [
     ['Propriétaire', 'Racheter la station une première fois.'], ['Ponctuel', 'Racheter la station sans manquer une échéance.'],
@@ -541,7 +541,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <h3>Caractères</h3>
       ${tableau(['Caractère', 'Effet', 'Salaire', 'Débloqué par'], TRAITS.map(t => [t[0], t[1], t[2] || '-', t[3] || 'Dès le départ']))}
       <h3>Stats, note et rareté</h3>
-      <p>Chaque employé a trois stats, de 1 à 5, affichées en carrés sur sa carte (<code>Eff ■■■□□ End ■■□□□ S-f ■■■■□</code>).</p>
+      <p>Chaque employé a trois stats, de 1 à 5, affichées en carrés sur sa carte : <b>Travail</b> (sa vitesse), <b>Forme</b> (il résiste à la fatigue) et <b>Moral</b> (il tient le coup quand ça va mal). Plus il y a de carrés pleins, mieux c'est.</p>
       ${tableau(['Stat', 'Agit sur', '1', '2', '3', '4', '5'], STATS)}
       <p>La <b>note</b> est le total des trois stats, plus 2 pour une deuxième compétence (de 3 à 17). C'est elle qui donne la <b>rareté</b>, la couleur du cadre, et qui fait monter le salaire.</p>
       ${tableau(['Rareté', 'Note', 'En pratique'], RARETES.map(r => ['<span class="rar" style="color:#' + r[1] + '">' + r[0] + '</span>', r[2], r[3]]))}
