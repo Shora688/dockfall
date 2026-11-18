@@ -267,7 +267,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   <div class="dl">
     <div class="carte cyan">
       <dl class="fiche">
-        <dt>Version</dt><dd>Prototype 0.6</dd>
+        <dt>Version</dt><dd>Prototype 0.7</dd>
         <dt>Système</dt><dd>Windows 10 ou 11, 64 bits</dd>
         <dt>Fichier</dt><dd><span id="dl-nom">Dockfall-windows.zip</span> • <span id="dl-taille">environ 50 Mo</span></dd>
         <dt>Langue</dt><dd>Français</dd>
@@ -352,6 +352,13 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   </div>
   <div class="journal">
     <div class="version">
+      <div><p class="num">0.7</p><p class="date">Novembre 2026</p></div>
+      <ul>
+        <li><b>Grands projets</b> (touche O) : balise, aile résidentielle, bouclier, chantier naval, siège de la guilde. De gros chantiers à effet permanent, qui rapportent du score.</li>
+        <li><b>Menaces de fin de partie</b> : blocus, grand raid, tempête majeure et offre de rachat de la Compagnie.</li>
+      </ul>
+    </div>
+    <div class="version">
       <div><p class="num">0.6</p><p class="date">Novembre 2026</p></div>
       <ul>
         <li><b>Stations de départ</b> : le Relais, l'Épave (usée mais riche) et l'Avant-poste (militaire), à débloquer avec des licences.</li>
@@ -415,7 +422,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
 <footer>
   <div class="wrap">
-    <span>Dockfall • prototype 0.6 • fait avec Godot 4</span>
+    <span>Dockfall • prototype 0.7 • fait avec Godot 4</span>
     <span>Police du site : VT323 et IBM Plex (licence OFL)</span>
   </div>
 </footer>
@@ -495,7 +502,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <figure><img class="capture" src="images/preparation.png" alt="L'écran de préparation : choix du secteur, des licences et du niveau de Menace." loading="lazy"><figcaption>Préparation, étape 1 : le secteur, les licences à dépenser et le niveau de Menace.</figcaption></figure>` },
     { id: 'echeances', titre: 'Score et rachat', corps: `
       <p>Le but de Dockfall, c'est le <b>plus gros score</b>. Il s'affiche en jaune en haut de l'écran, en direct : c'est ce que tu gardes si la partie s'arrête maintenant. En fin de partie, il se convertit en licences (une pour 60 points) et le menu garde ton record.</p>
-      ${tableau(['Ce qui compte', 'Points'], [['Chaque cycle tenu', 10], ['Chaque tranche de 100 ¢ versée à la Compagnie', 1], ['Ta meilleure réputation', '1 par point'], ['Chaque survivant en fin de partie', 25], ['Le rachat de la station', 500], ['Chaque niveau de Menace', '+20 % sur le total']])}
+      ${tableau(['Ce qui compte', 'Points'], [['Chaque cycle tenu', 10], ['Chaque tranche de 100 ¢ versée à la Compagnie', 1], ['Ta meilleure réputation', '1 par point'], ['Chaque survivant en fin de partie', 25], ['Le rachat de la station', 500], ['Chaque grand projet terminé', '200 à 700'], ['Chaque niveau de Menace', '+20 % sur le total']])}
       <h3>Les échéances</h3>
       <p>Toutes les <b>7 cycles</b>, la Compagnie prélève une échéance dans ta caisse. La première vaut 2 000 ¢, les suivantes augmentent nettement. La case en haut à droite affiche son numéro (par exemple <code>3/6</code>), son montant et les cycles restants.</p>
       <h3>Racheter la station</h3>
@@ -563,6 +570,23 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       <p>Les panneaux solaires (+6) et le réacteur (+14) produisent l'énergie ; presque tous les autres modules en consomment. Le solde s'affiche en haut de l'écran.</p>
       <p>En <b>déficit</b>, la station coupe des modules dans cet ordre : cantine, marché, atelier, quais, sécurité, quartiers, infirmerie, réservoir, et le recycleur en dernier. Tu peux changer l'ordre en réglant la <b>priorité</b> d'un module sur sa fiche (basse, normale, haute).</p>
       <p>L'<b>oxygène</b> baisse quand il y a plus de personnes à bord que de places dans les recycleurs, équipages de passage compris. À 0 %, un membre de l'équipe meurt toutes les 60 secondes.</p>` },
+    { id: 'projets', titre: 'Grands projets', corps: `
+      <p>Après la 2e échéance, un bouton <b>Projets</b> (touche O) apparaît. Il propose cinq gros chantiers : un seul à la fois, payé au lancement, terminé après quelques cycles. L'effet dure toute la partie, et chaque projet rapporte du score.</p>
+      ${tableau(['Projet', 'Prix', 'Durée', 'Score', 'Effet'], [
+        ['Balise longue portée', prix(6000), '2 cycles', '+200', '30 % de vaisseaux en plus'],
+        ['Aile résidentielle', prix(9000), '2 cycles', '+200', '+4 lits et +6 places d\u2019oxygène'],
+        ['Bouclier de coque', prix(10000), '3 cycles', '+250', 'Usure -40 %, défense contre l\u2019abordage +50 %'],
+        ['Chantier naval', prix(12000), '3 cycles', '+250', 'Les réparations rapportent 40 % de plus'],
+        ['Siège de la guilde', prix(20000), '4 cycles', '+700', 'Réputation +15'],
+      ])}
+      <h3>Les menaces de fin de partie</h3>
+      <p>Une station qui rapporte gros attire l'attention. À partir du cycle 35, ou une fois la station rachetée :</p>
+      <ul>
+        <li><b>Blocus</b> : la Compagnie coupe le tanker et le fournisseur pendant deux cycles, sauf si tu paies un arrangement.</li>
+        <li><b>Grand raid</b> : une flottille de 5 pirates ou plus. Rançon, ou combat à bord.</li>
+        <li><b>Tempête majeure</b> : panneaux aveugles pendant un cycle et demi, et un module en panne.</li>
+        <li><b>Offre de rachat</b> (propriétaire) : vendre à la Compagnie et partir avec +400 au score, ou refuser et voir les taxes monter de 15 % pour toujours.</li>
+      </ul>` },
     { groupe: 'L’équipage' },
     { id: 'personnel', titre: 'Personnel', corps: `
       <p>Chaque employé a un <b>métier</b> (mécanique, technique, commerce, médecine ou sécurité), un <b>caractère</b> et trois <b>stats</b> qui donnent sa rareté. Il travaille à 100 % à un poste de son métier, à 50 % ailleurs.</p>
@@ -645,7 +669,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     { groupe: 'Pratique' },
     { id: 'touches', titre: 'Touches', corps: `
       <p>Les raccourcis se changent dans <b>Options › Touches du clavier</b>, au menu principal. Voici les touches par défaut.</p>
-      ${tableau(['Touche', 'Action'], [['<kbd>C</kbd>', 'Construire'], ['<kbd>P</kbd>', 'Personnel'], ['<kbd>T</kbd>', 'Tarifs, tanker et fournisseur'], ['<kbd>S</kbd>', 'Secteur : Vega, capitaines, inspection'], ['<kbd>M</kbd>', 'Volet des missions'], ['<kbd>L</kbd>', 'Licences (une fois propriétaire)'], ['<kbd>A</kbd>', 'Alerte générale'], ['<kbd>Espace</kbd>', 'Pause'], ['<kbd>H</kbd>', 'Aide-mémoire'], ['<kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>', 'Vitesse normale, ×2, ×3 (fixes)'], ['<kbd>Échap</kbd>', 'Fermer un panneau, menu pause (fixe)'], ['Molette', 'Zoom'], ['Flèches, clic molette', 'Déplacer la vue'], ['<kbd>F11</kbd>', 'Plein écran (fixe)']])}` },
+      ${tableau(['Touche', 'Action'], [['<kbd>C</kbd>', 'Construire'], ['<kbd>P</kbd>', 'Personnel'], ['<kbd>T</kbd>', 'Tarifs, tanker et fournisseur'], ['<kbd>S</kbd>', 'Secteur : Vega, capitaines, inspection'], ['<kbd>M</kbd>', 'Volet des missions'], ['<kbd>O</kbd>', 'Grands projets (après la 2e échéance)'], ['<kbd>L</kbd>', 'Licences (une fois propriétaire)'], ['<kbd>A</kbd>', 'Alerte générale'], ['<kbd>Espace</kbd>', 'Pause'], ['<kbd>H</kbd>', 'Aide-mémoire'], ['<kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>', 'Vitesse normale, ×2, ×3 (fixes)'], ['<kbd>Échap</kbd>', 'Fermer un panneau, menu pause (fixe)'], ['Molette', 'Zoom'], ['Flèches, clic molette', 'Déplacer la vue'], ['<kbd>F11</kbd>', 'Plein écran (fixe)']])}` },
   ];
   const PAGES = ARTICLES.filter(a => a.id);
 
