@@ -267,7 +267,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   <div class="dl">
     <div class="carte cyan">
       <dl class="fiche">
-        <dt>Version</dt><dd>Prototype 0.4.2</dd>
+        <dt>Version</dt><dd>Prototype 0.5</dd>
         <dt>Système</dt><dd>Windows 10 ou 11, 64 bits</dd>
         <dt>Fichier</dt><dd><span id="dl-nom">Dockfall-windows.zip</span> • <span id="dl-taille">environ 50 Mo</span></dd>
         <dt>Langue</dt><dd>Français</dd>
@@ -352,6 +352,14 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   </div>
   <div class="journal">
     <div class="version">
+      <div><p class="num">0.5</p><p class="date">Novembre 2026</p></div>
+      <ul>
+        <li><b>Voisinage</b> : la place des modules compte. Atelier collé au quai, marché à côté de l'entrepôt, cantine, infirmerie ou recycleur près des quartiers, sécurité près d'un quai : chaque paire donne un bonus. Le réacteur, lui, chauffe ses voisins.</li>
+        <li>Pastilles vertes et rouges sur les murs, effets dans la fiche des modules, et aperçu des bonus avant de construire.</li>
+        <li>Stats des employés renommées Travail, Forme et Moral, en carrés réguliers.</li>
+      </ul>
+    </div>
+    <div class="version">
       <div><p class="num">0.4</p><p class="date">Novembre 2026</p></div>
       <ul>
         <li><b>Classement mondial</b> : la partie la plus longue gagne. Choisis un pseudo dans le jeu, tes parties terminées sont envoyées toutes seules, et le classement se consulte au menu ou sur ce site.</li>
@@ -399,7 +407,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
 <footer>
   <div class="wrap">
-    <span>Dockfall • prototype 0.4.2 • fait avec Godot 4</span>
+    <span>Dockfall • prototype 0.5 • fait avec Godot 4</span>
     <span>Police du site : VT323 et IBM Plex (licence OFL)</span>
   </div>
 </footer>
@@ -524,6 +532,25 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       ${tableau(['Module', 'Chaque niveau en plus'], AMELIORATIONS)}
       <h3>Usure et pannes</h3>
       <p>Un module qui travaille s'use. Sous 35 % d'intégrité, il risque la panne à chaque fin de cycle. Les mécaniciens sans travail l'entretiennent, une pièce pour 10 points d'intégrité.</p>` },
+    { id: 'voisinage', titre: 'Voisinage', corps: `
+      <p>Deux modules qui se <b>touchent</b>, côte à côte sur le même étage ou l'un au-dessus de l'autre, peuvent se rendre service. L'ascenseur sépare la gauche et la droite de la station : on ne se touche pas à travers lui.</p>
+      ${tableau(['Modules', 'Effet'], [
+        ['Atelier + quai', 'Réparations +30 % pour les vaisseaux amarrés à ce quai'],
+        ['Marché + entrepôt', 'Commerce +25 %'],
+        ['Cantine + quartiers', 'Sommeil 30 % plus réparateur'],
+        ['Infirmerie + quartiers', 'Blessés soignés 30 % plus vite'],
+        ['Recycleur + quartiers', '+2 places d\u2019oxygène'],
+        ['Poste de sécurité + quai', 'Défense contre l\u2019abordage +50 %'],
+        ['Réacteur + n\u2019importe quel module', 'Chaleur : le voisin s\u2019use 50 % plus vite'],
+      ])}
+      <h3>Le voir en jeu</h3>
+      <ul>
+        <li>Une <b>pastille verte</b> sur un mur commun signale un bonus, une <b>rouge</b> la chaleur du réacteur.</li>
+        <li>La fiche d'un module liste ce que lui apportent ses voisins, ou propose ses bons voisins s'il n'en a aucun.</li>
+        <li>En mode construction, l'emplacement survolé annonce à l'avance les effets qu'il apportera.</li>
+      </ul>
+      <div class="encart">Le réacteur est puissant mais chaud : isole-le au bout d'un étage, ou à côté d'un module dont l'usure compte peu, comme un entrepôt.</div>
+      <figure><img class="capture" src="images/voisinage.png" alt="Mode construction : l'emplacement survolé annonce un bonus de voisinage." loading="lazy"><figcaption>En construisant une infirmerie sous les quartiers : la pastille verte et l'effet s'affichent avant même de poser.</figcaption></figure>` },
     { id: 'energie', titre: 'Énergie et oxygène', corps: `
       <p>Les panneaux solaires (+6) et le réacteur (+14) produisent l'énergie ; presque tous les autres modules en consomment. Le solde s'affiche en haut de l'écran.</p>
       <p>En <b>déficit</b>, la station coupe des modules dans cet ordre : cantine, marché, atelier, quais, sécurité, quartiers, infirmerie, réservoir, et le recycleur en dernier. Tu peux changer l'ordre en réglant la <b>priorité</b> d'un module sur sa fiche (basse, normale, haute).</p>
